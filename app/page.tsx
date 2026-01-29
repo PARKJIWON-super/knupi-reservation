@@ -9,7 +9,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-gray-50 flex flex-col items-center p-4">
       {/* 헤더 섹션 */}
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-sm p-6 mb-6 flex items-center gap-4 border border-gray-100">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-sm p-6 mb-4 flex items-center gap-4 border border-gray-100">
         <div className="bg-blue-600 p-3 rounded-xl text-white">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 10l12-3" />
@@ -21,7 +21,33 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 예약하기 버튼 (메인 액션) */}
+      {/* 주의사항 섹션 (사범대 스타일) */}
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-sm p-6 mb-4 border border-gray-100">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-red-500 text-lg">⚠️</span>
+          <h3 className="font-bold text-gray-800">이용 주의사항</h3>
+        </div>
+        <ul className="space-y-2 text-sm text-gray-600 font-medium">
+          <li className="flex gap-2">
+            <span className="text-blue-500">•</span>
+            <span>이용 가능 시간: 09:00 ~ 24:00</span>
+          </li>
+          <li className="flex gap-2">
+            <span className="text-blue-500">•</span>
+            <span>음식물 반입 금지 (음료 포함)</span>
+          </li>
+          <li className="flex gap-2">
+            <span className="text-blue-500">•</span>
+            <span>다음 사용자를 위한 뒷정리 필수</span>
+          </li>
+          <li className="flex gap-2">
+            <span className="text-blue-500">•</span>
+            <span>예약 후 불참 시 이용 제한 가능</span>
+          </li>
+        </ul>
+      </div>
+
+      {/* 예약하기 버튼 */}
       <Link href="/reservation" className="w-full max-w-md mb-4">
         <div className="bg-blue-600 rounded-2xl p-6 text-white flex justify-between items-center cursor-pointer hover:bg-blue-700 transition-all shadow-lg shadow-blue-100">
           <div>
@@ -52,10 +78,10 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 예약 조회 입력창 (버튼 클릭 시 등장) */}
+      {/* 예약 조회 입력창 (조회 버튼 클릭 시 등장) */}
       {showLookup && (
         <div className="w-full max-w-md bg-blue-50 rounded-2xl p-6 mb-4 border border-blue-100 animate-in fade-in slide-in-from-top-4 duration-300">
-          <h3 className="text-sm font-bold text-blue-700 mb-4">조회 정보를 입력하세요</h3>
+          <h3 className="text-sm font-bold text-blue-700 mb-4 text-center">조회 정보를 입력하세요</h3>
           <div className="space-y-3">
             <input type="text" placeholder="이름" className="w-full p-3 rounded-xl border-0 ring-1 ring-gray-200 focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
             <input type="text" placeholder="학번" className="w-full p-3 rounded-xl border-0 ring-1 ring-gray-200 focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
@@ -65,14 +91,6 @@ export default function Home() {
           </div>
         </div>
       )}
-
-      {/* 하단 공지사항 */}
-      <div className="w-full max-w-md p-2">
-        <p className="text-[11px] text-gray-400 leading-relaxed font-medium">
-          • 연습실 사용 후 뒷정리를 반드시 해주세요.<br/>
-          • 예약 후 미방문 시 추후 이용에 제한이 있을 수 있습니다.
-        </p>
-      </div>
 
       <footer className="mt-auto py-8 text-[10px] text-gray-300 font-bold tracking-widest">
         © KYUNGPOOK NATIONAL UNIV. PIANO CLUB KNUPI
