@@ -13,7 +13,7 @@ export default function Home() {
         </div>
         <div>
           <h1 className="text-xl font-bold text-gray-800">크누피 연습실 예약</h1>
-          <p className="text-xs text-gray-500 font-medium">KNUPY PRACTICE ROOM RESERVATION</p>
+          <p className="text-xs text-gray-500 font-medium">KNUPI PRACTICE ROOM RESERVATION</p>
         </div>
       </div>
 
@@ -69,7 +69,7 @@ export default function Home() {
       </div>
 
       <footer className="mt-auto py-6 text-[10px] text-gray-400">
-        © KyungPook National Univ. Piano Club KNUPY Reservation System
+        © KyungPook National Univ. Piano Club KNUPI Reservation System
       </footer>
     </main>
   );
