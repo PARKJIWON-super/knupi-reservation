@@ -23,9 +23,10 @@ export default function ReservationPage() {
       full: d.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })
     };
   });
-
+  
   // 특정 시간대가 예약되었는지 확인하는 함수
-  const isReserved = (pianoName, time) => {
+  // pianoName은 문자열(string), time은 숫자(number)라고 타입을 지정해줍니다.
+  const isReserved = (pianoName: string, time: number) => {
     return mockReservations.some(res => 
       res.piano === pianoName && 
       res.date === selectedDate && 
