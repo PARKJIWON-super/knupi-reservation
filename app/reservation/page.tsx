@@ -9,9 +9,22 @@ export default function ReservationPage() {
   const timeSlots = Array.from({ length: 31 }, (_, i) => 9 + i * 0.5);
 
   const [dbReservations, setDbReservations] = useState<any[]>([]);
-  const [selectedDate, setSelectedDate] = useState(0);
   
-  // 현재 입력창이 열려있는 피아노 관리 (null이면 닫힘)
+  // 14일치 날짜 데이터 미리 생성
+  const dates = Array.from({ length: 14 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() + i);
+    // YYYY-MM-DD 형식으로 변환 (예: 2026-02-02)
+    const dateString = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    return {
+      day: d.toLocaleDateString('ko-KR', { weekday: 'short' }),
+      date: d.getDate(),
+      fullDate: dateString
+    };
+  });
+
+  // 상태 관리: 초기값은 오늘 날짜 문자열
+  const [selectedDate, setSelectedDate] = useState(dates[0].fullDate);
   const [activePiano, setActivePiano] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
@@ -22,6 +35,7 @@ export default function ReservationPage() {
     end: 9.5
   });
 
+  // 데이터 불러오기
   const fetchReservations = async () => {
     const { data, error } = await supabase.from('reservations').select('*');
     if (error) console.error('불러오기 에러:', error);
@@ -32,6 +46,7 @@ export default function ReservationPage() {
     fetchReservations();
   }, [selectedDate]);
 
+  // 예약 로직
   const handleReserve = async (pianoName: string) => {
     if (!formData.name || !formData.studentId) {
       alert("이름과 학번을 입력해주세요!");
@@ -43,21 +58,20 @@ export default function ReservationPage() {
       return;
     }
 
-    // 2. 중복 예약 체크 로직 추가
-  const isOverlap = dbReservations.some(res => {
-    return (
-      res.piano_name === pianoName &&
-      String(res.data) === String(selectedDate) &&
-      // 겹치는 시간 계산 공식: (내 시작 < 기존 종료) && (내 종료 > 기존 시작)
-      formData.start < res.end_time && 
-      formData.end > res.start_time
-    );
-  });
+    // 중복 예약 체크 로직 (실제 날짜 selectedDate 기준)
+    const isOverlap = dbReservations.some(res => {
+      return (
+        res.piano_name === pianoName &&
+        String(res.data) === String(selectedDate) &&
+        formData.start < res.end_time && 
+        formData.end > res.start_time
+      );
+    });
 
-  if (isOverlap) {
-    alert("죄송합니다. 선택하신 시간대에 이미 예약이 존재합니다.");
-    return;
-  }
+    if (isOverlap) {
+      alert("죄송합니다. 선택하신 시간대에 이미 예약이 존재합니다.");
+      return;
+    }
 
     const { error } = await supabase
       .from('reservations')
@@ -67,7 +81,7 @@ export default function ReservationPage() {
           student_id: formData.studentId, 
           phone: formData.phone,
           piano_name: pianoName,
-          data: String(selectedDate),
+          data: selectedDate, // 이제 "2026-02-02" 같은 실제 날짜가 저장됨
           start_time: Number(formData.start),
           end_time: Number(formData.end)
         }
@@ -77,17 +91,9 @@ export default function ReservationPage() {
       alert("예약 중 오류가 발생했습니다.");
     } else {
       alert("🎉 예약이 성공적으로 완료되었습니다!");
-      setActivePiano(null); // 입력창 닫기
+      setActivePiano(null);
       fetchReservations();
     }
-  };
-
-  const isReserved = (pianoName: string, time: number) => {
-    return dbReservations.some(res => 
-      res.piano_name === pianoName && 
-      String(res.data) === String(selectedDate) && 
-      time >= res.start_time && time < res.end_time
-    );
   };
 
   const getReservationInfo = (pianoName: string, time: number) => {
@@ -98,18 +104,8 @@ export default function ReservationPage() {
     );
   };
 
-  const dates = Array.from({ length: 14 }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() + i);
-    return {
-      day: d.toLocaleDateString('ko-KR', { weekday: 'short' }),
-      date: d.getDate()
-    };
-  });
-
   return (
     <main className="min-h-screen bg-[#F8F9FA] pb-20 font-sans text-[#1A1F27]">
-      {/* 상단 헤더 */}
       <div className="bg-white border-b border-gray-100 sticky top-0 z-20 px-4 py-3 flex items-center justify-between">
         <Link href="/" className="p-2 hover:bg-gray-50 rounded-full transition-colors">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -124,9 +120,12 @@ export default function ReservationPage() {
         {/* 날짜 선택 섹션 */}
         <section className="mb-6 overflow-x-auto scrollbar-hide">
           <div className="flex gap-3 pb-2">
-            {dates.map((d, i) => (
-              <button key={i} onClick={() => { setSelectedDate(i); setActivePiano(null); }}
-                className={`flex-shrink-0 w-14 py-3 rounded-2xl flex flex-col items-center transition-all ${selectedDate === i ? 'bg-blue-600 text-white shadow-lg' : 'bg-white text-gray-400 border border-gray-100'}`}>
+            {dates.map((d) => (
+              <button 
+                key={d.fullDate} 
+                onClick={() => { setSelectedDate(d.fullDate); setActivePiano(null); }}
+                className={`flex-shrink-0 w-14 py-3 rounded-2xl flex flex-col items-center transition-all ${selectedDate === d.fullDate ? 'bg-blue-600 text-white shadow-lg' : 'bg-white text-gray-400 border border-gray-100'}`}
+              >
                 <span className="text-[10px] font-bold mb-1">{d.day}</span>
                 <span className="text-lg font-extrabold">{d.date}</span>
               </button>
@@ -134,7 +133,7 @@ export default function ReservationPage() {
           </div>
         </section>
 
-        {/* 연습실 목록 (입력창 포함형) */}
+        {/* 연습실 목록 */}
         <section className="space-y-4">
           {pianos.map((piano, idx) => {
             const isOpen = activePiano === piano;
@@ -154,7 +153,6 @@ export default function ReservationPage() {
                     </button>
                   </div>
 
-                  {/* 타임라인 바 (기존 툴팁 로직 유지) */}
                   <div className="relative pt-2">
                     <div className="flex gap-[1px] h-4 bg-gray-50 rounded-full overflow-hidden border border-gray-100">
                       {timeSlots.map(t => {
@@ -177,7 +175,6 @@ export default function ReservationPage() {
                   </div>
                 </div>
 
-                {/* 선택 시 나타나는 인라인 입력 폼 */}
                 {isOpen && (
                   <div className="bg-[#F8F9FF] p-6 border-t border-blue-50 space-y-4">
                     <h4 className="text-xs font-bold text-blue-600 px-1">신청 정보 입력</h4>
