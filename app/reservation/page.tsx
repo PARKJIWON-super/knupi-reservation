@@ -138,11 +138,23 @@ export default function ReservationPage() {
               <div className="relative pt-2">
                 <div className="flex gap-[1px] h-4 bg-gray-50 rounded-full overflow-hidden border border-gray-100">
                   {timeSlots.map(t => {
-                    const reserved = isReserved(piano, t);
-                    return (
-                      <div key={t} className={`flex-1 transition-colors ${reserved ? 'bg-gray-300' : 'bg-white hover:bg-blue-50'}`}></div>
-                    );
-                  })}
+      // 해당 시간에 예약이 있는지 확인
+      const reservation = dbReservations.find(res => 
+        res.piano_name === piano && 
+        String(res.data) === String(selectedDate) && 
+        t >= res.start_time && t < res.end_time
+      );
+
+      return (
+        <div 
+          key={t} 
+          className={`flex-1 transition-colors ${reservation ? 'bg-gray-300' : 'bg-white hover:bg-blue-50'}`}
+          // title 속성이 마우스를 올렸을 때 나타나는 툴팁 역할을 합니다.
+          title={reservation ? `${reservation.user_name} 님 예약 중` : `${t}:00 이용 가능`}
+        ></div>
+      );
+    })}
+                  
                 </div>
                 <div className="flex justify-between mt-2 text-[9px] text-gray-300 font-bold px-1 uppercase">
                   <span>09:00</span>
