@@ -43,6 +43,22 @@ export default function ReservationPage() {
       return;
     }
 
+    // 2. 중복 예약 체크 로직 추가
+  const isOverlap = dbReservations.some(res => {
+    return (
+      res.piano_name === pianoName &&
+      String(res.data) === String(selectedDate) &&
+      // 겹치는 시간 계산 공식: (내 시작 < 기존 종료) && (내 종료 > 기존 시작)
+      formData.start < res.end_time && 
+      formData.end > res.start_time
+    );
+  });
+
+  if (isOverlap) {
+    alert("죄송합니다. 선택하신 시간대에 이미 예약이 존재합니다.");
+    return;
+  }
+
     const { error } = await supabase
       .from('reservations')
       .insert([
