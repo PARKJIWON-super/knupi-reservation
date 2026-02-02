@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
@@ -26,7 +26,7 @@ export default function Home() {
       .order('data', { ascending: true });
 
     if (error) {
-      console.error("조회 에러:", error);
+      console.error("조회 에러:", error.message);
       alert("조회 중 오류가 발생했습니다.");
     } else {
       setMyReservations(data || []);
@@ -35,31 +35,29 @@ export default function Home() {
     setIsSearching(false);
   };
 
-  // 2. ★ 예약 취소 (삭제) 로직 추가 ★
+  // 2. ★ 예약 취소 로직 (UI 즉시 반영형) ★
   const handleDelete = async (id: string) => {
-    // 사용자에게 한 번 더 확인
     if (!confirm("정말로 이 예약을 취소하시겠습니까?")) return;
 
-    // Supabase에서 해당 ID의 행(row) 삭제
+    // DB에서 데이터 삭제
     const { error } = await supabase
       .from('reservations')
       .delete()
       .eq('id', id);
 
     if (error) {
-      console.error("삭제 에러:", error);
-      alert("취소 처리 중 오류가 발생했습니다.");
+      console.error("삭제 에러:", error.message);
+      alert("취소 처리 중 오류가 발생했습니다. Supabase RLS 설정을 확인하세요.");
     } else {
+      // ★ 핵심: DB 삭제 성공 시, 화면 리스트에서 해당 항목을 즉시 제거 (새로고침 불필요)
+      setMyReservations((prev) => prev.filter((res) => res.id !== id));
       alert("✅ 예약이 성공적으로 취소되었습니다.");
-      
-      // 삭제 후 UI에서 즉시 반영하기 위해 목록을 다시 불러옴
-      handleSearch(); 
     }
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 flex flex-col items-center p-4">
-      {/* 헤더 섹션 (기존 레이아웃 유지) */}
+    <main className="min-h-screen bg-gray-50 flex flex-col items-center p-4 font-sans text-[#1A1F27]">
+      {/* 헤더 섹션 */}
       <div className="w-full max-w-md bg-white rounded-2xl shadow-sm p-6 mb-4 flex items-center gap-4 border border-gray-100">
         <div className="bg-blue-600 p-3 rounded-xl text-white">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -67,7 +65,7 @@ export default function Home() {
           </svg>
         </div>
         <div>
-          <h1 className="text-xl font-bold text-gray-800 tracking-tight">크누피 연습실 예약</h1>
+          <h1 className="text-xl font-bold tracking-tight">크누피 연습실 예약</h1>
           <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">KNUPI Practice Room</p>
         </div>
       </div>
@@ -81,6 +79,7 @@ export default function Home() {
         <ul className="space-y-2 text-sm text-gray-600 font-medium">
           <li className="flex gap-2"><span className="text-blue-500">•</span><span>이용 가능 시간: 09:00 ~ 24:00</span></li>
           <li className="flex gap-2"><span className="text-blue-500">•</span><span>음식물 반입 금지 및 뒷정리 필수</span></li>
+          <li className="flex gap-2"><span className="text-blue-500">•</span><span>노쇼 시 향후 이용이 제한될 수 있습니다.</span></li>
         </ul>
       </div>
 
@@ -106,7 +105,7 @@ export default function Home() {
       >
         <div>
           <h2 className="text-lg font-bold text-gray-700">내 예약 확인하기</h2>
-          <p className="text-sm text-gray-400 font-medium">이름과 학번으로 조회</p>
+          <p className="text-sm text-gray-400 font-medium">이름과 학번으로 조회 및 취소</p>
         </div>
         <div className="bg-gray-100 rounded-full p-2 text-gray-500">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -122,37 +121,36 @@ export default function Home() {
           <div className="space-y-3">
             <input 
               type="text" placeholder="이름" 
-              className="w-full p-3 rounded-xl border-0 ring-1 ring-gray-200 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
+              className="w-full p-4 rounded-xl border-0 ring-1 ring-gray-200 focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white" 
               onChange={(e) => setInfo({...info, name: e.target.value})}
             />
             <input 
               type="text" placeholder="학번" 
-              className="w-full p-3 rounded-xl border-0 ring-1 ring-gray-200 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
+              className="w-full p-4 rounded-xl border-0 ring-1 ring-gray-200 focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white" 
               onChange={(e) => setInfo({...info, studentId: e.target.value})}
             />
             <button 
               onClick={handleSearch}
               disabled={isSearching}
-              className="w-full bg-blue-600 text-white font-bold py-3 rounded-xl text-sm shadow-md active:scale-95 transition-all"
+              className="w-full bg-blue-600 text-white font-bold py-4 rounded-xl text-sm shadow-md active:scale-95 transition-all"
             >
               {isSearching ? '조회 중...' : '조회하기'}
             </button>
 
             {/* 조회 결과 리스트 */}
-            <div className="mt-4 space-y-2">
+            <div className="mt-6 space-y-3">
               {myReservations.map((res) => (
-                <div key={res.id} className="bg-white p-4 rounded-xl shadow-sm flex justify-between items-center border border-blue-100">
+                <div key={res.id} className="bg-white p-5 rounded-2xl shadow-sm flex justify-between items-center border border-blue-50 animate-in fade-in zoom-in duration-300">
                   <div>
-                    <span className="text-[10px] font-bold text-blue-600 block">{res.piano_name}</span>
+                    <span className="text-[10px] font-bold text-blue-600 block mb-1 uppercase tracking-tighter">{res.piano_name}</span>
                     <p className="text-sm font-bold text-gray-800">{res.data === '0' ? '오늘' : `${res.data}일 뒤`} 예약</p>
                     <p className="text-[11px] text-gray-400 font-medium">{res.start_time}:00 - {res.end_time}:00</p>
                   </div>
-                  {/* ★ 취소 버튼에 handleDelete 연결 ★ */}
                   <button 
                     onClick={() => handleDelete(res.id)}
-                    className="text-red-500 text-[11px] font-bold p-2 hover:bg-red-50 rounded-lg transition-colors"
+                    className="text-red-500 text-xs font-bold px-3 py-2 hover:bg-red-50 rounded-xl transition-colors"
                   >
-                    취소
+                    취소하기
                   </button>
                 </div>
               ))}
@@ -161,7 +159,7 @@ export default function Home() {
         </div>
       )}
 
-      <footer className="mt-auto py-8 text-[10px] text-gray-300 font-bold tracking-widest uppercase">
+      <footer className="mt-auto py-10 text-[10px] text-gray-300 font-bold tracking-widest uppercase">
         © KYUNGPOOK NATIONAL UNIV. PIANO CLUB KNUPI
       </footer>
     </main>
