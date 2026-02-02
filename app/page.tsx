@@ -26,6 +26,7 @@ export default function Home() {
       .order('data', { ascending: true });
 
     if (error) {
+      console.error("조회 에러:", error);
       alert("조회 중 오류가 발생했습니다.");
     } else {
       setMyReservations(data || []);
@@ -34,20 +35,31 @@ export default function Home() {
     setIsSearching(false);
   };
 
-  // 2. 예약 취소 함수
+  // 2. ★ 예약 취소 (삭제) 로직 추가 ★
   const handleDelete = async (id: string) => {
-    if (confirm("정말로 이 예약을 취소하시겠습니까?")) {
-      const { error } = await supabase.from('reservations').delete().eq('id', id);
-      if (!error) {
-        alert("예약이 취소되었습니다.");
-        handleSearch(); // 목록 새로고침
-      }
+    // 사용자에게 한 번 더 확인
+    if (!confirm("정말로 이 예약을 취소하시겠습니까?")) return;
+
+    // Supabase에서 해당 ID의 행(row) 삭제
+    const { error } = await supabase
+      .from('reservations')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error("삭제 에러:", error);
+      alert("취소 처리 중 오류가 발생했습니다.");
+    } else {
+      alert("✅ 예약이 성공적으로 취소되었습니다.");
+      
+      // 삭제 후 UI에서 즉시 반영하기 위해 목록을 다시 불러옴
+      handleSearch(); 
     }
   };
 
   return (
     <main className="min-h-screen bg-gray-50 flex flex-col items-center p-4">
-      {/* 헤더 섹션 */}
+      {/* 헤더 섹션 (기존 레이아웃 유지) */}
       <div className="w-full max-w-md bg-white rounded-2xl shadow-sm p-6 mb-4 flex items-center gap-4 border border-gray-100">
         <div className="bg-blue-600 p-3 rounded-xl text-white">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -103,7 +115,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 조회 입력창 및 결과 (요청하신 위치) */}
+      {/* 예약 조회 입력창 및 결과 리스트 */}
       {showLookup && (
         <div className="w-full max-w-md bg-blue-50 rounded-2xl p-6 mb-4 border border-blue-100 animate-in fade-in slide-in-from-top-4 duration-300">
           <h3 className="text-sm font-bold text-blue-700 mb-4 text-center">조회 정보를 입력하세요</h3>
@@ -135,6 +147,7 @@ export default function Home() {
                     <p className="text-sm font-bold text-gray-800">{res.data === '0' ? '오늘' : `${res.data}일 뒤`} 예약</p>
                     <p className="text-[11px] text-gray-400 font-medium">{res.start_time}:00 - {res.end_time}:00</p>
                   </div>
+                  {/* ★ 취소 버튼에 handleDelete 연결 ★ */}
                   <button 
                     onClick={() => handleDelete(res.id)}
                     className="text-red-500 text-[11px] font-bold p-2 hover:bg-red-50 rounded-lg transition-colors"
