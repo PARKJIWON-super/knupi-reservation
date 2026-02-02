@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
@@ -9,8 +9,9 @@ export default function Home() {
   const [info, setInfo] = useState({ name: '', studentId: '' });
   const [myReservations, setMyReservations] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false); // 관리자 여부 상태 추가
 
-  // 1. 내 예약 조회 함수
+  // 1. 예약 조회 함수 (관리자 로직 통합)
   const handleSearch = async () => {
     if (!info.name || !info.studentId) {
       alert("이름과 학번을 입력해주세요.");
@@ -18,12 +19,24 @@ export default function Home() {
     }
 
     setIsSearching(true);
-    const { data, error } = await supabase
-      .from('reservations')
-      .select('*')
-      .eq('user_name', info.name)
-      .eq('student_id', info.studentId)
-      .order('data', { ascending: true });
+    
+    let query = supabase.from('reservations').select('*');
+
+    // ★ 관리자 체크: 운영자 / 12345 입력 시 전체 조회
+    if (info.name === '운영자' && info.studentId === '12345') {
+      setIsAdmin(true);
+      // 전체 데이터를 날짜순으로 정렬해서 가져옴
+      query = query.order('data', { ascending: true });
+    } else {
+      setIsAdmin(false);
+      // 일반 사용자: 본인 데이터만 필터링
+      query = query
+        .eq('user_name', info.name)
+        .eq('student_id', info.studentId)
+        .order('data', { ascending: true });
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error("조회 에러:", error.message);
@@ -35,11 +48,10 @@ export default function Home() {
     setIsSearching(false);
   };
 
-  // 2. ★ 예약 취소 로직 (UI 즉시 반영형) ★
+  // 2. 예약 취소 로직
   const handleDelete = async (id: string) => {
     if (!confirm("정말로 이 예약을 취소하시겠습니까?")) return;
 
-    // DB에서 데이터 삭제
     const { error } = await supabase
       .from('reservations')
       .delete()
@@ -47,9 +59,8 @@ export default function Home() {
 
     if (error) {
       console.error("삭제 에러:", error.message);
-      alert("취소 처리 중 오류가 발생했습니다. Supabase RLS 설정을 확인하세요.");
+      alert("취소 처리 중 오류가 발생했습니다. 권한 설정을 확인하세요.");
     } else {
-      // ★ 핵심: DB 삭제 성공 시, 화면 리스트에서 해당 항목을 즉시 제거 (새로고침 불필요)
       setMyReservations((prev) => prev.filter((res) => res.id !== id));
       alert("✅ 예약이 성공적으로 취소되었습니다.");
     }
@@ -100,7 +111,7 @@ export default function Home() {
 
       {/* 예약 확인하기 버튼 */}
       <div 
-        onClick={() => { setShowLookup(!showLookup); setMyReservations([]); }}
+        onClick={() => { setShowLookup(!showLookup); setMyReservations([]); setIsAdmin(false); }}
         className="w-full max-w-md bg-white rounded-2xl p-6 mb-4 flex justify-between items-center cursor-pointer hover:bg-gray-50 transition-all border border-gray-200"
       >
         <div>
@@ -117,7 +128,9 @@ export default function Home() {
       {/* 예약 조회 입력창 및 결과 리스트 */}
       {showLookup && (
         <div className="w-full max-w-md bg-blue-50 rounded-2xl p-6 mb-4 border border-blue-100 animate-in fade-in slide-in-from-top-4 duration-300">
-          <h3 className="text-sm font-bold text-blue-700 mb-4 text-center">조회 정보를 입력하세요</h3>
+          <h3 className="text-sm font-bold text-blue-700 mb-4 text-center">
+            {isAdmin ? "🔒 관리자 모드 활성화" : "조회 정보를 입력하세요"}
+          </h3>
           <div className="space-y-3">
             <input 
               type="text" placeholder="이름" 
@@ -143,14 +156,16 @@ export default function Home() {
                 <div key={res.id} className="bg-white p-5 rounded-2xl shadow-sm flex justify-between items-center border border-blue-50 animate-in fade-in zoom-in duration-300">
                   <div>
                     <span className="text-[10px] font-bold text-blue-600 block mb-1 uppercase tracking-tighter">{res.piano_name}</span>
-                    <p className="text-sm font-bold text-gray-800">{res.data === '0' ? '오늘' : `${res.data}일 뒤`} 예약</p>
+                    <p className="text-sm font-bold text-gray-800">
+                      {isAdmin ? `👤 ${res.user_name} | ` : ""}{res.data} 예약
+                    </p>
                     <p className="text-[11px] text-gray-400 font-medium">{res.start_time}:00 - {res.end_time}:00</p>
                   </div>
                   <button 
                     onClick={() => handleDelete(res.id)}
                     className="text-red-500 text-xs font-bold px-3 py-2 hover:bg-red-50 rounded-xl transition-colors"
                   >
-                    취소하기
+                    {isAdmin ? "강제취소" : "취소하기"}
                   </button>
                 </div>
               ))}
