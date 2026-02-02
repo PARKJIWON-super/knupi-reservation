@@ -40,7 +40,7 @@ export default function ReservationPage() {
     fetchReservations();
   }, [selectedDate]);
 
-  // 2. 예약 신청 함수 (DB에 저장)
+  // 2. 예약 신청 함수 (DB 저장)
   const handleReserve = async () => {
     if (!formData.name || !formData.studentId || !formData.piano) {
       alert("이름, 학번을 입력하고 피아노를 선택해주세요!");
@@ -50,23 +50,23 @@ export default function ReservationPage() {
     const { error } = await supabase
       .from('reservations')
       .insert([
-        {
-          user_name: formData.name,
-          student_id: formData.studentId,
+        { 
+          user_name: formData.name, 
+          student_id: formData.studentId, 
           phone: formData.phone,
           piano_name: formData.piano,
-          date_index: selectedDate,
-          start_time: formData.start,
-          end_time: formData.end
+          data: String(selectedDate), // date_index를 data로 변경! (문자열로 전송)
+          start_time: Number(formData.start),
+          end_time: Number(formData.end)
         }
       ]);
 
     if (error) {
-      alert("예약 신청 중 오류가 발생했습니다.");
-      console.error(error);
+      console.error('상세 에러:', error); // 콘솔에서 더 자세히 볼 수 있게 추가
+      alert("예약 중 오류가 발생했습니다.");
     } else {
-      alert("예약이 완료되었습니다!");
-      fetchReservations(); // 저장 후 즉시 목록 새로고침
+      alert("예약이 성공적으로 완료되었습니다!");
+      fetchReservations(); 
     }
   };
 
