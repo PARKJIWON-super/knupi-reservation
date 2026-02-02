@@ -2,48 +2,51 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase'; // 설정해두신 supabase 파일을 불러옵니다.
+import { supabase } from '@/lib/supabase';
 
 export default function ReservationPage() {
   const pianos = ["1번 피아노", "2번 피아노", "3번 피아노", "업라이트 피아노"];
-  const timeSlots = Array.from({ length: 30 }, (_, i) => 9 + i * 0.5); // 09:00 ~ 24:00 (30분 단위)
+  const timeSlots = Array.from({ length: 31 }, (_, i) => 9 + i * 0.5); // 09:00 ~ 24:00 (30분 단위)
 
-  // 상태 관리: DB에서 가져온 진짜 데이터를 담습니다.
+  // 상태 관리
   const [dbReservations, setDbReservations] = useState<any[]>([]);
   const [selectedDate, setSelectedDate] = useState(0);
   
-  // 입력 폼 상태
   const [formData, setFormData] = useState({
     name: '',
     studentId: '',
     phone: '',
     piano: '',
     start: 9,
-    end: 10
+    end: 9.5
   });
 
-  // 1. 데이터베이스에서 예약 내역 가져오기
+  // 1. 데이터베이스에서 예약 내역 실시간 가져오기
   const fetchReservations = async () => {
     const { data, error } = await supabase
       .from('reservations')
       .select('*');
     
     if (error) {
-      console.error('Error fetching reservations:', error);
+      console.error('불러오기 에러:', error);
     } else {
       setDbReservations(data || []);
     }
   };
 
-  // 페이지 로드 시 및 날짜 변경 시 데이터 새로고침
   useEffect(() => {
     fetchReservations();
   }, [selectedDate]);
 
-  // 2. 예약 신청 함수 (DB 저장)
+  // 2. 예약 신청 함수
   const handleReserve = async () => {
     if (!formData.name || !formData.studentId || !formData.piano) {
       alert("이름, 학번을 입력하고 피아노를 선택해주세요!");
+      return;
+    }
+
+    if (formData.start >= formData.end) {
+      alert("종료 시간은 시작 시간보다 늦어야 합니다.");
       return;
     }
 
@@ -55,19 +58,28 @@ export default function ReservationPage() {
           student_id: formData.studentId, 
           phone: formData.phone,
           piano_name: formData.piano,
-          data: String(selectedDate), // date_index를 data로 변경! (문자열로 전송)
+          data: String(selectedDate), // DB 컬럼명 'data'에 저장
           start_time: Number(formData.start),
           end_time: Number(formData.end)
         }
       ]);
 
     if (error) {
-      console.error('상세 에러:', error); // 콘솔에서 더 자세히 볼 수 있게 추가
-      alert("예약 중 오류가 발생했습니다.");
+      console.error('저장 에러:', error);
+      alert("예약 중 오류가 발생했습니다. RLS 설정을 확인해주세요.");
     } else {
-      alert("예약이 성공적으로 완료되었습니다!");
-      fetchReservations(); 
+      alert("🎉 예약이 성공적으로 완료되었습니다!");
+      fetchReservations(); // 즉시 타임라인 색상 갱신
     }
+  };
+
+  // 3. 특정 시간대가 예약되었는지 확인 (색상 변경 로직)
+  const isReserved = (pianoName: string, time: number) => {
+    return dbReservations.some(res => 
+      res.piano_name === pianoName && 
+      String(res.data) === String(selectedDate) && // date_index 대신 data 사용
+      time >= res.start_time && time < res.end_time
+    );
   };
 
   const dates = Array.from({ length: 14 }, (_, i) => {
@@ -75,19 +87,9 @@ export default function ReservationPage() {
     d.setDate(d.getDate() + i);
     return {
       day: d.toLocaleDateString('ko-KR', { weekday: 'short' }),
-      date: d.getDate(),
-      full: d.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })
+      date: d.getDate()
     };
   });
-  
-  // 3. 특정 시간대가 예약되었는지 확인 (DB 데이터 기준)
-  const isReserved = (pianoName: string, time: number) => {
-    return dbReservations.some(res => 
-      res.piano_name === pianoName && 
-      res.date_index === selectedDate && 
-      time >= res.start_time && time < res.end_time
-    );
-  };
 
   return (
     <main className="min-h-screen bg-[#F8F9FA] pb-32 font-sans text-[#1A1F27]">
@@ -108,7 +110,7 @@ export default function ReservationPage() {
           <div className="flex gap-3 pb-2">
             {dates.map((d, i) => (
               <button key={i} onClick={() => setSelectedDate(i)}
-                className={`flex-shrink-0 w-14 py-3 rounded-2xl flex flex-col items-center transition-all ${selectedDate === i ? 'bg-blue-600 text-white shadow-lg' : 'bg-white text-gray-400 border border-gray-100'}`}>
+                className={`flex-shrink-0 w-14 py-3 rounded-2xl flex flex-col items-center transition-all ${selectedDate === i ? 'bg-blue-600 text-white shadow-lg shadow-blue-100' : 'bg-white text-gray-400 border border-gray-100'}`}>
                 <span className="text-[10px] font-bold mb-1">{d.day}</span>
                 <span className="text-lg font-extrabold">{d.date}</span>
               </button>
@@ -155,24 +157,24 @@ export default function ReservationPage() {
 
         {/* 정보 입력 및 신청 폼 */}
         <section className="mt-8 bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 space-y-4">
-          <h2 className="font-bold text-gray-800 mb-2">예약 정보 입력</h2>
+          <h2 className="font-bold text-gray-800 mb-2 text-sm">신청 정보 입력</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input type="text" placeholder="이름" className="p-4 bg-gray-50 rounded-xl outline-none focus:ring-2 focus:ring-blue-500" 
+            <input type="text" placeholder="이름" className="p-4 bg-gray-50 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm" 
               onChange={(e) => setFormData({...formData, name: e.target.value})} />
-            <input type="text" placeholder="학번 (10자리)" className="p-4 bg-gray-50 rounded-xl outline-none focus:ring-2 focus:ring-blue-500" 
+            <input type="text" placeholder="학번 (10자리)" className="p-4 bg-gray-50 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm" 
               onChange={(e) => setFormData({...formData, studentId: e.target.value})} />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1">
               <label className="text-[10px] font-bold text-gray-400 ml-1">시작 시간</label>
-              <select className="p-4 bg-gray-50 rounded-xl outline-none" onChange={(e) => setFormData({...formData, start: Number(e.target.value)})}>
-                {timeSlots.map(t => <option key={t} value={t}>{t}:00</option>)}
+              <select className="p-4 bg-gray-50 rounded-xl outline-none text-sm" value={formData.start} onChange={(e) => setFormData({...formData, start: Number(e.target.value)})}>
+                {timeSlots.map(t => <option key={t} value={t}>{t % 1 === 0 ? `${t}:00` : `${Math.floor(t)}:30`}</option>)}
               </select>
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-[10px] font-bold text-gray-400 ml-1">종료 시간</label>
-              <select className="p-4 bg-gray-50 rounded-xl outline-none" onChange={(e) => setFormData({...formData, end: Number(e.target.value)})}>
-                {timeSlots.map(t => <option key={t} value={t}>{t}:00</option>)}
+              <select className="p-4 bg-gray-50 rounded-xl outline-none text-sm" value={formData.end} onChange={(e) => setFormData({...formData, end: Number(e.target.value)})}>
+                {timeSlots.map(t => <option key={t} value={t}>{t % 1 === 0 ? `${t}:00` : `${Math.floor(t)}:30`}</option>)}
               </select>
             </div>
           </div>
