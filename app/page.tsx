@@ -10,72 +10,72 @@ export default function Home() {
   const [myReservations, setMyReservations] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  
-  // 랭킹 데이터 상태
   const [rankings, setRankings] = useState<{name: string, total: number}[]>([]);
 
-  // 1. 이달의 예약왕 데이터 집계 함수
+  // 1. 이달의 예약왕 데이터 집계 함수 (기존 유지)
   const fetchRankings = async () => {
     const now = new Date();
-    // 이번 달의 시작일 (예: 2026-02-01)
     const firstDayOfMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
-
-    const { data, error } = await supabase
-      .from('reservations')
-      .select('user_name, start_time, end_time')
-      .gte('data', firstDayOfMonth); // 이번 달 데이터만 필터링
-
+    const { data } = await supabase.from('reservations').select('user_name, start_time, end_time').gte('data', firstDayOfMonth);
     if (data) {
-      // 이름별로 연습 시간 합산
       const aggregate = data.reduce((acc: any, cur) => {
         const duration = cur.end_time - cur.start_time;
         acc[cur.user_name] = (acc[cur.user_name] || 0) + duration;
         return acc;
       }, {});
-
-      // 배열로 변환 후 내림차순 정렬하여 상위 3명 추출
-      const sorted = Object.entries(aggregate)
-        .map(([name, total]) => ({ name, total: total as number }))
-        .sort((a, b) => b.total - a.total)
-        .slice(0, 3);
-
+      const sorted = Object.entries(aggregate).map(([name, total]) => ({ name, total: total as number })).sort((a, b) => b.total - a.total).slice(0, 3);
       setRankings(sorted);
     }
   };
 
-  useEffect(() => {
-    fetchRankings();
-  }, []);
+  useEffect(() => { fetchRankings(); }, []);
 
-  // 2. 내 예약 조회 함수 (기존 로직 유지)
+  // 2. 내 예약 조회 함수 (★ 오늘 날짜 필터링 추가)
   const handleSearch = async () => {
     if (!info.name || !info.studentId) {
       alert("이름과 학번을 입력해주세요.");
       return;
     }
     setIsSearching(true);
+
+    // ★ 오늘 날짜 구하기 (YYYY-MM-DD 형식)
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
     let query = supabase.from('reservations').select('*');
+
+    // 관리자 여부 체크
     if (info.name === '운영자' && info.studentId === '12345') {
       setIsAdmin(true);
+      // 관리자는 전체 보되, 날짜순 정렬
       query = query.order('data', { ascending: true });
     } else {
       setIsAdmin(false);
-      query = query.eq('user_name', info.name).eq('student_id', info.studentId).order('data', { ascending: true });
+      query = query
+        .eq('user_name', info.name)
+        .eq('student_id', info.studentId)
+        .gte('data', today) // ★ 핵심: 'data' 컬럼의 값이 오늘(today)보다 크거나 같은 것만 가져옴
+        .order('data', { ascending: true });
     }
+
     const { data, error } = await query;
-    if (error) { alert("조회 중 오류가 발생했습니다."); } 
-    else { setMyReservations(data || []); if (data?.length === 0) alert("내역이 없습니다."); }
+    if (error) { 
+      alert("조회 중 오류가 발생했습니다."); 
+    } else { 
+      setMyReservations(data || []); 
+      if (data?.length === 0) alert("오늘 이후의 예약 내역이 없습니다."); 
+    }
     setIsSearching(false);
   };
 
-  // 3. 예약 취소 로직
+  // 3. 예약 취소 로직 (기존 유지)
   const handleDelete = async (id: string) => {
     if (!confirm("정말로 이 예약을 취소하시겠습니까?")) return;
     const { error } = await supabase.from('reservations').delete().eq('id', id);
     if (!error) {
       setMyReservations((prev) => prev.filter((res) => res.id !== id));
       alert("✅ 예약이 취소되었습니다.");
-      fetchRankings(); // 취소 시 랭킹도 갱신
+      fetchRankings();
     }
   };
 
@@ -101,7 +101,6 @@ export default function Home() {
           <span className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">February 2026</span>
         </div>
         <div className="flex justify-around items-end gap-2 pt-4">
-          {/* 2등 */}
           {rankings[1] && (
             <div className="flex flex-col items-center flex-1">
               <span className="text-2xl mb-1">🥈</span>
@@ -112,7 +111,6 @@ export default function Home() {
               <div className="w-full h-12 bg-gray-100 rounded-b-md"></div>
             </div>
           )}
-          {/* 1등 */}
           {rankings[0] && (
             <div className="flex flex-col items-center flex-1">
               <span className="text-3xl mb-1">🥇</span>
@@ -123,7 +121,6 @@ export default function Home() {
               <div className="w-full h-20 bg-blue-600 rounded-b-md shadow-lg shadow-blue-100"></div>
             </div>
           )}
-          {/* 3등 */}
           {rankings[2] && (
             <div className="flex flex-col items-center flex-1">
               <span className="text-2xl mb-1">🥉</span>
@@ -150,7 +147,7 @@ export default function Home() {
         </ul>
       </div>
 
-      {/* 버튼들... (기존 예약하기, 확인하기 버튼 코드 동일) */}
+      {/* 예약하기 버튼 */}
       <Link href="/reservation" className="w-full max-w-md mb-4">
         <div className="bg-blue-600 rounded-2xl p-6 text-white flex justify-between items-center hover:bg-blue-700 transition-all shadow-lg shadow-blue-100">
           <div><h2 className="text-xl font-bold">연습실 예약하기</h2><p className="text-sm opacity-80 font-medium">실시간 현황 확인 및 예약</p></div>
@@ -158,9 +155,10 @@ export default function Home() {
         </div>
       </Link>
 
+      {/* 내 예약 확인하기 버튼 */}
       <div onClick={() => { setShowLookup(!showLookup); setMyReservations([]); setIsAdmin(false); }}
         className="w-full max-w-md bg-white rounded-2xl p-6 mb-4 flex justify-between items-center cursor-pointer border border-gray-200">
-        <div><h2 className="text-lg font-bold text-gray-700">내 예약 확인하기</h2><p className="text-sm text-gray-400 font-medium">조회 및 취소</p></div>
+        <div><h2 className="text-lg font-bold text-gray-700">내 예약 확인하기</h2><p className="text-sm text-gray-400 font-medium">오늘부터의 예약 조회 및 취소</p></div>
         <div className="bg-gray-100 rounded-full p-2 text-gray-500">🔍</div>
       </div>
 
