@@ -146,12 +146,12 @@ export default function ReservationPage() {
           <div className="bg-white px-4 py-2 rounded-2xl flex items-center gap-2 shadow-sm border border-gray-100">
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
             <span className="text-[11px] font-bold text-blue-600 tracking-tight">
-              {currentTime.getHours()}시 {currentTime.getMinutes()}분 {currentTime.getSeconds()}초
+              현재 시간: {currentTime.getHours()}시 {currentTime.getMinutes()}분 {currentTime.getSeconds()}초
             </span>
           </div>
           <div className="flex gap-4 text-[11px] font-bold">
             <div className="flex items-center gap-1.5 text-gray-500">
-              <div className="w-3 h-3 bg-white border border-gray-200 rounded-sm"></div> 사용가능
+              <div className="w-3 h-3 bg-white border border-gray-200 rounded-sm"></div> 이용 가능
             </div>
             <div className="flex items-center gap-1.5 text-gray-500">
               <div className="w-3 h-3 bg-gray-400 rounded-sm"></div> 예약됨
