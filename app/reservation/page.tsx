@@ -149,47 +149,46 @@ export default function ReservationPage() {
                     </button>
                   </div>
 
-                  {/* ★ 1시간 단위 눈금이 적용된 타임라인 섹션 */}
-                  <div className="relative mt-2 px-1">
-                    {/* 9시부터 23시까지 모든 시간 표시 */}
-                    <div className="flex justify-between mb-2 text-[9px] text-gray-400 font-bold px-1">
-                      {Array.from({ length: 15 }, (_, i) => 9 + i).map((hour) => (
-                        <span key={hour} className="w-0 flex justify-center">
-                          {hour}
-                        </span>
-                      ))}
-                      <span className="w-0 flex justify-center text-[8px] text-gray-300">24</span>
-                    </div>
+                 {/* 1시간 단위 눈금이 균일하게 적용된 타임라인 섹션 */}
+<div className="relative mt-2 px-1">
+  {/* 9시부터 24시까지 모든 시간 표시 (스타일 통일) */}
+  <div className="flex justify-between mb-2 text-[9px] text-gray-400 font-bold px-1">
+    {Array.from({ length: 16 }, (_, i) => 9 + i).map((hour) => (
+      <span key={hour} className="w-0 flex justify-center">
+        {hour}
+      </span>
+    ))}
+  </div>
 
-                    <div className="relative h-8 bg-gray-100 rounded-xl p-1 shadow-inner flex gap-[1.5px]">
-                      {timeSlots.map((t) => {
-                        const res = getReservationInfo(piano, t);
-                        const isHour = t % 1 === 0;
-                        
-                        const startTime = t % 1 === 0 ? `${t}:00` : `${Math.floor(t)}:30`;
-                        const endTimeNum = t + 0.5;
-                        const endTime = endTimeNum === 24 
-                          ? '24:00' 
-                          : (endTimeNum % 1 === 0 ? `${endTimeNum}:00` : `${Math.floor(endTimeNum)}:30`);
+  <div className="relative h-8 bg-gray-100 rounded-xl p-1 shadow-inner flex gap-[1.5px]">
+    {timeSlots.map((t) => {
+      const res = getReservationInfo(piano, t);
+      const isHour = t % 1 === 0;
+      
+      const startTime = t % 1 === 0 ? `${t}:00` : `${Math.floor(t)}:30`;
+      const endTimeNum = t + 0.5;
+      const endTime = endTimeNum === 24 
+        ? '24:00' 
+        : (endTimeNum % 1 === 0 ? `${endTimeNum}:00` : `${Math.floor(endTimeNum)}:30`);
 
-                        return (
-                          <div
-                            key={t}
-                            className={`relative flex-1 rounded-sm transition-all duration-200 ${
-                              res 
-                                ? 'bg-gray-400 shadow-sm cursor-not-allowed' 
-                                : 'bg-white hover:bg-blue-100 hover:scale-y-110 cursor-pointer'
-                            }`}
-                            title={res ? `${res.user_name} 님 예약 중 (${startTime}-${endTime})` : `${startTime} - ${endTime} 이용 가능`}
-                          >
-                            {isHour && (
-                              <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-[1px] h-1 bg-gray-300"></div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
+      return (
+        <div
+          key={t}
+          className={`relative flex-1 rounded-sm transition-all duration-200 ${
+            res 
+              ? 'bg-gray-400 shadow-sm cursor-not-allowed' 
+              : 'bg-white hover:bg-blue-100 hover:scale-y-110 cursor-pointer'
+          }`}
+          title={res ? `${res.user_name} 님 예약 중 (${startTime}-${endTime})` : `${startTime} - ${endTime} 이용 가능`}
+        >
+          {isHour && (
+            <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-[1px] h-1 bg-gray-300"></div>
+          )}
+        </div>
+      );
+    })}
+  </div>
+</div>
                 </div>
 
                 {isOpen && (
