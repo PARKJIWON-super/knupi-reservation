@@ -7,7 +7,7 @@ import { supabase } from '@/lib/supabase';
 export default function ReservationPage() {
   const pianos = ["1번 피아노", "2번 피아노", "3번 피아노", "업라이트 피아노"];
   
-  // ★ 09:00부터 24:00까지 30분 단위는 총 30개의 슬롯입니다.
+  // 09:00부터 24:00까지 30분 단위 슬롯 (총 30개)
   const timeSlots = Array.from({ length: 30 }, (_, i) => 9 + i * 0.5);
 
   const [dbReservations, setDbReservations] = useState<any[]>([]);
@@ -100,7 +100,6 @@ export default function ReservationPage() {
     );
   };
 
-  // 종료 시간 옵션 생성 (24:00까지 포함)
   const endSlots = Array.from({ length: 31 }, (_, i) => 9.5 + i * 0.5).filter(t => t <= 24);
 
   return (
@@ -150,21 +149,23 @@ export default function ReservationPage() {
                     </button>
                   </div>
 
+                  {/* ★ 1시간 단위 눈금이 적용된 타임라인 섹션 */}
                   <div className="relative mt-2 px-1">
-                    <div className="flex justify-between mb-2 text-[10px] text-gray-400 font-bold px-0.5">
-                      <span>09:00</span>
-                      <span>13:00</span>
-                      <span>17:00</span>
-                      <span>21:00</span>
-                      <span>24:00</span>
+                    {/* 9시부터 23시까지 모든 시간 표시 */}
+                    <div className="flex justify-between mb-2 text-[9px] text-gray-400 font-bold px-1">
+                      {Array.from({ length: 15 }, (_, i) => 9 + i).map((hour) => (
+                        <span key={hour} className="w-0 flex justify-center">
+                          {hour}
+                        </span>
+                      ))}
+                      <span className="w-0 flex justify-center text-[8px] text-gray-300">24</span>
                     </div>
 
-                    <div className="relative h-8 bg-gray-100 rounded-xl p-1 shadow-inner flex gap-[2px]">
+                    <div className="relative h-8 bg-gray-100 rounded-xl p-1 shadow-inner flex gap-[1.5px]">
                       {timeSlots.map((t) => {
                         const res = getReservationInfo(piano, t);
                         const isHour = t % 1 === 0;
                         
-                        // 툴팁 시간 계산 (24:00까지만 나오도록 처리)
                         const startTime = t % 1 === 0 ? `${t}:00` : `${Math.floor(t)}:30`;
                         const endTimeNum = t + 0.5;
                         const endTime = endTimeNum === 24 
@@ -182,7 +183,7 @@ export default function ReservationPage() {
                             title={res ? `${res.user_name} 님 예약 중 (${startTime}-${endTime})` : `${startTime} - ${endTime} 이용 가능`}
                           >
                             {isHour && (
-                              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-[1px] h-1 bg-gray-300"></div>
+                              <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-[1px] h-1 bg-gray-300"></div>
                             )}
                           </div>
                         );
