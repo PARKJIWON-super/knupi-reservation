@@ -11,7 +11,6 @@ export default function ReservationPage() {
   const [dbReservations, setDbReservations] = useState<any[]>([]);
   const [currentTime, setCurrentTime] = useState(new Date());
 
-  // 1. 실시간 시계 로직
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
@@ -22,7 +21,7 @@ export default function ReservationPage() {
     d.setDate(d.getDate() + i);
     const dateString = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     return {
-      month: d.getMonth() + 1, // 월 정보 추가
+      month: d.getMonth() + 1,
       day: d.toLocaleDateString('ko-KR', { weekday: 'short' }),
       date: d.getDate(),
       fullDate: dateString
@@ -107,7 +106,7 @@ export default function ReservationPage() {
 
   return (
     <main className="min-h-screen bg-[#F8F9FA] pb-20 font-sans text-[#1A1F27]">
-      {/* 상단 헤더 */}
+      {/* 헤더 */}
       <div className="bg-white border-b border-gray-100 sticky top-0 z-20 px-4 py-3 flex items-center justify-between">
         <Link href="/" className="p-2 hover:bg-gray-50 rounded-full transition-colors">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -119,27 +118,9 @@ export default function ReservationPage() {
       </div>
 
       <div className="max-w-2xl mx-auto px-4 mt-6">
-        {/* 2. 현재 시간 및 범례 표시 섹션 */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="bg-blue-50 text-blue-600 px-4 py-1.5 rounded-full flex items-center gap-2 shadow-sm border border-blue-100">
-            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-            <span className="text-xs font-bold tracking-tight">
-              현재 시각: {currentTime.toLocaleTimeString('ko-KR', { hour12: false })}
-            </span>
-          </div>
-          <div className="flex gap-4 text-[11px] font-bold text-gray-500">
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 bg-gray-400 rounded-full"></div> 예약됨
-            </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 bg-[#334155] rounded-full"></div> 사용불가
-            </div>
-          </div>
-        </div>
-
-        {/* 3. 월 정보가 추가된 날짜 선택 섹션 */}
-        <section className="mb-8 overflow-x-auto scrollbar-hide">
-          <div className="flex gap-3 pb-4">
+        {/* 1. 날짜 선택 섹션 (상단으로 이동 및 월 표시 개선) */}
+        <section className="mb-4 overflow-x-auto scrollbar-hide">
+          <div className="flex gap-3 pb-2">
             {dates.map((d) => (
               <button 
                 key={d.fullDate} 
@@ -150,13 +131,34 @@ export default function ReservationPage() {
                   : 'bg-white text-gray-400 border border-gray-100'
                 }`}
               >
-                <span className="text-[10px] font-bold mb-1 opacity-70">{d.month}월 {d.day}</span>
+                {/* 월 정보를 상단에 아주 작게 배치하여 깔끔하게 변경 */}
+                <span className="text-[9px] font-bold mb-0.5 opacity-60 leading-none">{d.month}월</span>
+                <span className="text-[11px] font-bold mb-1">{d.day}</span>
                 <span className="text-xl font-extrabold">{d.date}</span>
               </button>
             ))}
           </div>
         </section>
 
+        {/* 2. 현재 시간 및 범례 표시 섹션 (날짜 밑으로 이동) */}
+        <div className="flex items-center justify-between mb-8 px-1">
+          <div className="bg-white px-4 py-2 rounded-2xl flex items-center gap-2 shadow-sm border border-gray-100">
+            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+            <span className="text-[11px] font-bold text-blue-600">
+              {currentTime.getHours()}시 {currentTime.getMinutes()}분 {currentTime.getSeconds()}초
+            </span>
+          </div>
+          <div className="flex gap-4 text-[11px] font-bold text-gray-400">
+            <div className="flex items-center gap-1.5">
+              <div className="w-3 h-3 bg-gray-400 rounded-full"></div> 예약됨
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-3 h-3 bg-[#334155] rounded-full"></div> 사용불가
+            </div>
+          </div>
+        </div>
+
+        {/* 연습실 목록 섹션 */}
         <section className="space-y-6">
           {pianos.map((piano, idx) => {
             const isOpen = activePiano === piano;
