@@ -12,7 +12,13 @@ export default function Home() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [rankings, setRankings] = useState<{name: string, total: number}[]>([]);
 
-  // 1. 이달의 예약왕 데이터 집계 함수 (기존 유지)
+  // 시간 포맷팅 함수 추가 (예: 13.5 -> 13:30)
+  const formatTime = (time: number) => {
+    const hours = Math.floor(time);
+    const minutes = (time % 1) === 0.5 ? '30' : '00';
+    return `${hours}:${minutes}`;
+  };
+
   const fetchRankings = async () => {
     const now = new Date();
     const firstDayOfMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
@@ -30,32 +36,22 @@ export default function Home() {
 
   useEffect(() => { fetchRankings(); }, []);
 
-  // 2. 내 예약 조회 함수 (★ 오늘 날짜 필터링 추가)
   const handleSearch = async () => {
     if (!info.name || !info.studentId) {
       alert("이름과 학번을 입력해주세요.");
       return;
     }
     setIsSearching(true);
-
-    // ★ 오늘 날짜 구하기 (YYYY-MM-DD 형식)
     const now = new Date();
     const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-
     let query = supabase.from('reservations').select('*');
 
-    // 관리자 여부 체크
     if (info.name === '운영자' && info.studentId === '12345') {
       setIsAdmin(true);
-      // 관리자는 전체 보되, 날짜순 정렬
       query = query.order('data', { ascending: true });
     } else {
       setIsAdmin(false);
-      query = query
-        .eq('user_name', info.name)
-        .eq('student_id', info.studentId)
-        .gte('data', today) // ★ 핵심: 'data' 컬럼의 값이 오늘(today)보다 크거나 같은 것만 가져옴
-        .order('data', { ascending: true });
+      query = query.eq('user_name', info.name).eq('student_id', info.studentId).gte('data', today).order('data', { ascending: true });
     }
 
     const { data, error } = await query;
@@ -68,7 +64,6 @@ export default function Home() {
     setIsSearching(false);
   };
 
-  // 3. 예약 취소 로직 (기존 유지)
   const handleDelete = async (id: string) => {
     if (!confirm("정말로 이 예약을 취소하시겠습니까?")) return;
     const { error } = await supabase.from('reservations').delete().eq('id', id);
@@ -171,7 +166,14 @@ export default function Home() {
             <div className="mt-6 space-y-3">
               {myReservations.map((res) => (
                 <div key={res.id} className="bg-white p-5 rounded-2xl shadow-sm flex justify-between items-center border border-blue-50">
-                  <div><span className="text-[10px] font-bold text-blue-600 block mb-1 uppercase tracking-tighter">{res.piano_name}</span><p className="text-sm font-bold text-gray-800">{isAdmin ? `👤 ${res.user_name} | ` : ""}{res.data} 예약</p><p className="text-[11px] text-gray-400 font-medium">{res.start_time}:00 - {res.end_time}:00</p></div>
+                  <div>
+                    <span className="text-[10px] font-bold text-blue-600 block mb-1 uppercase tracking-tighter">{res.piano_name}</span>
+                    <p className="text-sm font-bold text-gray-800">{isAdmin ? `👤 ${res.user_name} | ` : ""}{res.data} 예약</p>
+                    {/* ★ 시간 포맷팅 적용 부분 ★ */}
+                    <p className="text-[11px] text-gray-400 font-medium">
+                      {formatTime(res.start_time)} - {formatTime(res.end_time)}
+                    </p>
+                  </div>
                   <button onClick={() => handleDelete(res.id)} className="text-red-500 text-xs font-bold px-3 py-2 hover:bg-red-50 rounded-xl transition-colors">{isAdmin ? "강제취소" : "취소하기"}</button>
                 </div>
               ))}
