@@ -6,11 +6,12 @@ import { supabase } from '@/lib/supabase';
 
 export default function ReservationPage() {
   const pianos = ["1번 피아노", "2번 피아노", "3번 피아노", "업라이트 피아노"];
-  const timeSlots = Array.from({ length: 31 }, (_, i) => 9 + i * 0.5);
+  
+  // ★ 09:00부터 24:00까지 30분 단위는 총 30개의 슬롯입니다.
+  const timeSlots = Array.from({ length: 30 }, (_, i) => 9 + i * 0.5);
 
   const [dbReservations, setDbReservations] = useState<any[]>([]);
   
-  // 14일치 날짜 데이터 생성
   const dates = Array.from({ length: 14 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() + i);
@@ -99,9 +100,11 @@ export default function ReservationPage() {
     );
   };
 
+  // 종료 시간 옵션 생성 (24:00까지 포함)
+  const endSlots = Array.from({ length: 31 }, (_, i) => 9.5 + i * 0.5).filter(t => t <= 24);
+
   return (
     <main className="min-h-screen bg-[#F8F9FA] pb-20 font-sans text-[#1A1F27]">
-      {/* 상단 헤더 */}
       <div className="bg-white border-b border-gray-100 sticky top-0 z-20 px-4 py-3 flex items-center justify-between">
         <Link href="/" className="p-2 hover:bg-gray-50 rounded-full transition-colors">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -113,7 +116,6 @@ export default function ReservationPage() {
       </div>
 
       <div className="max-w-2xl mx-auto px-4 mt-6">
-        {/* 날짜 선택 섹션 */}
         <section className="mb-6 overflow-x-auto scrollbar-hide">
           <div className="flex gap-3 pb-2">
             {dates.map((d) => (
@@ -129,7 +131,6 @@ export default function ReservationPage() {
           </div>
         </section>
 
-        {/* 연습실 목록 */}
         <section className="space-y-4">
           {pianos.map((piano, idx) => {
             const isOpen = activePiano === piano;
@@ -149,53 +150,49 @@ export default function ReservationPage() {
                     </button>
                   </div>
 
-                  {/* 발전된 타임라인 섹션 */}
                   <div className="relative mt-2 px-1">
                     <div className="flex justify-between mb-2 text-[10px] text-gray-400 font-bold px-0.5">
                       <span>09:00</span>
                       <span>13:00</span>
                       <span>17:00</span>
                       <span>21:00</span>
-                      <span>00:00</span>
+                      <span>24:00</span>
                     </div>
 
                     <div className="relative h-8 bg-gray-100 rounded-xl p-1 shadow-inner flex gap-[2px]">
                       {timeSlots.map((t) => {
-  const res = getReservationInfo(piano, t);
-  const isHour = t % 1 === 0;
+                        const res = getReservationInfo(piano, t);
+                        const isHour = t % 1 === 0;
+                        
+                        // 툴팁 시간 계산 (24:00까지만 나오도록 처리)
+                        const startTime = t % 1 === 0 ? `${t}:00` : `${Math.floor(t)}:30`;
+                        const endTimeNum = t + 0.5;
+                        const endTime = endTimeNum === 24 
+                          ? '24:00' 
+                          : (endTimeNum % 1 === 0 ? `${endTimeNum}:00` : `${Math.floor(endTimeNum)}:30`);
 
-  // 툴팁에 표시할 시간 범위 계산
-  const startTime = t % 1 === 0 ? `${t}:00` : `${Math.floor(t)}:30`;
-  const endTimeNum = t + 0.5;
-  const endTime = endTimeNum % 1 === 0 ? `${endTimeNum}:00` : `${Math.floor(endTimeNum)}:30`;
-
-  return (
-    <div
-      key={t}
-      className={`relative flex-1 rounded-sm transition-all duration-200 ${
-        res 
-          ? 'bg-gray-400 shadow-sm cursor-not-allowed' 
-          : 'bg-white hover:bg-blue-100 hover:scale-y-110 cursor-pointer'
-      }`}
-      // ★ 이 부분을 수정합니다 ★
-      title={res 
-        ? `${res.user_name} 님 예약 중 (${startTime} - ${endTime})` 
-        : `${startTime} - ${endTime} 이용 가능`
-      }
-    >
-      {isHour && (
-        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-[1px] h-1 bg-gray-300"></div>
-      )}
-    </div>
-  );
-})}
+                        return (
+                          <div
+                            key={t}
+                            className={`relative flex-1 rounded-sm transition-all duration-200 ${
+                              res 
+                                ? 'bg-gray-400 shadow-sm cursor-not-allowed' 
+                                : 'bg-white hover:bg-blue-100 hover:scale-y-110 cursor-pointer'
+                            }`}
+                            title={res ? `${res.user_name} 님 예약 중 (${startTime}-${endTime})` : `${startTime} - ${endTime} 이용 가능`}
+                          >
+                            {isHour && (
+                              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-[1px] h-1 bg-gray-300"></div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
 
                 {isOpen && (
                   <div className="bg-[#F8F9FF] p-6 border-t border-blue-50 space-y-4">
-                    <h4 className="text-xs font-bold text-blue-600 px-1">신청 정보 입력</h4>
                     <div className="grid grid-cols-2 gap-3">
                       <input type="text" placeholder="이름" className="p-4 bg-white rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm border border-gray-100" 
                         onChange={(e) => setFormData({...formData, name: e.target.value})} />
@@ -212,15 +209,15 @@ export default function ReservationPage() {
                       <div className="flex flex-col gap-1">
                         <label className="text-[10px] font-bold text-gray-400 ml-1">종료 시간</label>
                         <select className="p-4 bg-white rounded-xl outline-none text-sm border border-gray-100" value={formData.end} onChange={(e) => setFormData({...formData, end: Number(e.target.value)})}>
-                          {timeSlots.map(t => <option key={t} value={t}>{t % 1 === 0 ? `${t}:00` : `${Math.floor(t)}:30`}</option>)}
+                          {endSlots.map(t => <option key={t} value={t}>{t === 24 ? '24:00' : (t % 1 === 0 ? `${t}:00` : `${Math.floor(t)}:30`)}</option>)}
                         </select>
                       </div>
                     </div>
                     <button 
                       onClick={() => handleReserve(piano)}
-                      className="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-100 active:scale-[0.98] transition-all"
+                      className="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg active:scale-[0.98] transition-all"
                     >
-                      해당 피아노 예약 완료
+                      예약 완료
                     </button>
                   </div>
                 )}
