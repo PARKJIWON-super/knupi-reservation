@@ -11,13 +11,11 @@ export default function ReservationPage() {
   const [dbReservations, setDbReservations] = useState<any[]>([]);
   const [currentTime, setCurrentTime] = useState(new Date());
 
-  // 실시간 시계 업데이트
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  // 14일치 날짜 데이터 생성
   const dates = Array.from({ length: 14 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() + i);
@@ -108,7 +106,6 @@ export default function ReservationPage() {
 
   return (
     <main className="min-h-screen bg-[#F8F9FA] pb-20 font-sans text-[#1A1F27]">
-      {/* 헤더 섹션 */}
       <div className="bg-white border-b border-gray-100 sticky top-0 z-20 px-4 py-3 flex items-center justify-between shadow-sm">
         <Link href="/" className="p-2 hover:bg-gray-50 rounded-full transition-colors">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -120,28 +117,31 @@ export default function ReservationPage() {
       </div>
 
       <div className="max-w-2xl mx-auto px-4 mt-6">
-        {/* 1. 날짜 선택 섹션 */}
+        {/* 1. 날짜 선택 섹션 (수 / 2/4 형식으로 변경) */}
         <section className="mb-4 overflow-x-auto scrollbar-hide">
           <div className="flex gap-3 pb-2 px-1">
             {dates.map((d) => (
               <button 
                 key={d.fullDate} 
                 onClick={() => { setSelectedDate(d.fullDate); setActivePiano(null); }}
-                className={`flex-shrink-0 w-16 py-4 rounded-[22px] flex flex-col items-center transition-all duration-300 ${
+                className={`flex-shrink-0 w-16 py-5 rounded-[22px] flex flex-col items-center justify-center transition-all duration-300 ${
                   selectedDate === d.fullDate 
                   ? 'bg-blue-600 text-white shadow-xl scale-105' 
                   : 'bg-white text-gray-400 border border-gray-100 shadow-sm'
                 }`}
               >
-                <span className="text-[9px] font-bold mb-0.5 opacity-60 leading-none">{d.month}월</span>
-                <span className="text-[11px] font-bold mb-1">{d.day}</span>
-                <span className="text-xl font-extrabold">{d.date}</span>
+                <span className={`text-[12px] font-bold mb-1 ${selectedDate === d.fullDate ? 'text-white' : 'text-gray-500'}`}>
+                  {d.day}
+                </span>
+                <span className="text-[14px] font-extrabold tracking-tight">
+                  {d.month}/{d.date}
+                </span>
               </button>
             ))}
           </div>
         </section>
 
-        {/* 2. 현재 시간 및 범례 표시 섹션 (날짜 아래 배치) */}
+        {/* 2. 현재 시간 및 범례 표시 섹션 */}
         <div className="flex items-center justify-between mb-8 px-1">
           <div className="bg-white px-4 py-2 rounded-2xl flex items-center gap-2 shadow-sm border border-gray-100">
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
