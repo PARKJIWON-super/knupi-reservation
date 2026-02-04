@@ -11,8 +11,10 @@ export default function Home() {
   const [isSearching, setIsSearching] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [rankings, setRankings] = useState<{name: string, total: number}[]>([]);
+  
+  // ★ 현재 월 구하기 (예: 2월)
+  const currentMonth = new Date().getMonth() + 1;
 
-  // 시간 포맷팅 함수 추가 (예: 13.5 -> 13:30)
   const formatTime = (time: number) => {
     const hours = Math.floor(time);
     const minutes = (time % 1) === 0.5 ? '30' : '00';
@@ -23,13 +25,17 @@ export default function Home() {
     const now = new Date();
     const firstDayOfMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
     const { data } = await supabase.from('reservations').select('user_name, start_time, end_time').gte('data', firstDayOfMonth);
+    
     if (data) {
       const aggregate = data.reduce((acc: any, cur) => {
         const duration = cur.end_time - cur.start_time;
         acc[cur.user_name] = (acc[cur.user_name] || 0) + duration;
         return acc;
       }, {});
-      const sorted = Object.entries(aggregate).map(([name, total]) => ({ name, total: total as number })).sort((a, b) => b.total - a.total).slice(0, 3);
+      const sorted = Object.entries(aggregate)
+        .map(([name, total]) => ({ name, total: total as number }))
+        .sort((a, b) => b.total - a.total)
+        .slice(0, 3);
       setRankings(sorted);
     }
   };
@@ -89,11 +95,14 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 🏆 이달의 예약왕 대시보드 */}
+      {/* 🏆 월별 예약왕 대시보드 (자동 명칭 변경) */}
       <div className="w-full max-w-md bg-white rounded-2xl shadow-sm p-6 mb-4 border border-gray-100">
         <div className="flex justify-between items-end mb-4">
-          <h3 className="font-bold text-gray-800">🏆 이달의 연습왕 TOP 3</h3>
-          <span className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">February 2026</span>
+          {/* ★ 이 부분이 매달 자동으로 바뀝니다 ★ */}
+          <h3 className="font-bold text-gray-800">🏆 {currentMonth}월의 연습왕 TOP 3</h3>
+          <span className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">
+            {new Date().toLocaleString('en-US', { month: 'long' })} {new Date().getFullYear()}
+          </span>
         </div>
         <div className="flex justify-around items-end gap-2 pt-4">
           {rankings[1] && (
@@ -169,7 +178,6 @@ export default function Home() {
                   <div>
                     <span className="text-[10px] font-bold text-blue-600 block mb-1 uppercase tracking-tighter">{res.piano_name}</span>
                     <p className="text-sm font-bold text-gray-800">{isAdmin ? `👤 ${res.user_name} | ` : ""}{res.data} 예약</p>
-                    {/* ★ 시간 포맷팅 적용 부분 ★ */}
                     <p className="text-[11px] text-gray-400 font-medium">
                       {formatTime(res.start_time)} - {formatTime(res.end_time)}
                     </p>
