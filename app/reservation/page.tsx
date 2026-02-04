@@ -10,11 +10,10 @@ export default function ReservationPage() {
 
   const [dbReservations, setDbReservations] = useState<any[]>([]);
   
-  // 14일치 날짜 데이터 미리 생성
+  // 14일치 날짜 데이터 생성
   const dates = Array.from({ length: 14 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() + i);
-    // YYYY-MM-DD 형식으로 변환 (예: 2026-02-02)
     const dateString = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     return {
       day: d.toLocaleDateString('ko-KR', { weekday: 'short' }),
@@ -23,7 +22,6 @@ export default function ReservationPage() {
     };
   });
 
-  // 상태 관리: 초기값은 오늘 날짜 문자열
   const [selectedDate, setSelectedDate] = useState(dates[0].fullDate);
   const [activePiano, setActivePiano] = useState<string | null>(null);
 
@@ -35,7 +33,6 @@ export default function ReservationPage() {
     end: 9.5
   });
 
-  // 데이터 불러오기
   const fetchReservations = async () => {
     const { data, error } = await supabase.from('reservations').select('*');
     if (error) console.error('불러오기 에러:', error);
@@ -46,7 +43,6 @@ export default function ReservationPage() {
     fetchReservations();
   }, [selectedDate]);
 
-  // 예약 로직
   const handleReserve = async (pianoName: string) => {
     if (!formData.name || !formData.studentId) {
       alert("이름과 학번을 입력해주세요!");
@@ -58,7 +54,6 @@ export default function ReservationPage() {
       return;
     }
 
-    // 중복 예약 체크 로직 (실제 날짜 selectedDate 기준)
     const isOverlap = dbReservations.some(res => {
       return (
         res.piano_name === pianoName &&
@@ -81,7 +76,7 @@ export default function ReservationPage() {
           student_id: formData.studentId, 
           phone: formData.phone,
           piano_name: pianoName,
-          data: selectedDate, // 이제 "2026-02-02" 같은 실제 날짜가 저장됨
+          data: selectedDate,
           start_time: Number(formData.start),
           end_time: Number(formData.end)
         }
@@ -106,6 +101,7 @@ export default function ReservationPage() {
 
   return (
     <main className="min-h-screen bg-[#F8F9FA] pb-20 font-sans text-[#1A1F27]">
+      {/* 상단 헤더 */}
       <div className="bg-white border-b border-gray-100 sticky top-0 z-20 px-4 py-3 flex items-center justify-between">
         <Link href="/" className="p-2 hover:bg-gray-50 rounded-full transition-colors">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -153,24 +149,36 @@ export default function ReservationPage() {
                     </button>
                   </div>
 
-                  <div className="relative pt-2">
-                    <div className="flex gap-[1px] h-4 bg-gray-50 rounded-full overflow-hidden border border-gray-100">
-                      {timeSlots.map(t => {
-                        const res = getReservationInfo(piano, t);
-                        return (
-                          <div 
-                            key={t} 
-                            className={`flex-1 transition-colors ${res ? 'bg-gray-300' : 'bg-white hover:bg-blue-50'}`}
-                            title={res ? `${res.user_name} 님 예약 중` : `${t}:00 이용 가능`}
-                          ></div>
-                        );
-                      })}
-                    </div>
-                    <div className="flex justify-between mt-2 text-[9px] text-gray-300 font-bold px-1 uppercase">
+                  {/* 발전된 타임라인 섹션 */}
+                  <div className="relative mt-2 px-1">
+                    <div className="flex justify-between mb-2 text-[10px] text-gray-400 font-bold px-0.5">
                       <span>09:00</span>
                       <span>13:00</span>
-                      <span>18:00</span>
-                      <span>24:00</span>
+                      <span>17:00</span>
+                      <span>21:00</span>
+                      <span>00:00</span>
+                    </div>
+
+                    <div className="relative h-8 bg-gray-100 rounded-xl p-1 shadow-inner flex gap-[2px]">
+                      {timeSlots.map((t) => {
+                        const res = getReservationInfo(piano, t);
+                        const isHour = t % 1 === 0;
+                        return (
+                          <div
+                            key={t}
+                            className={`relative flex-1 rounded-sm transition-all duration-200 ${
+                              res 
+                                ? 'bg-gray-400 shadow-sm cursor-not-allowed' 
+                                : 'bg-white hover:bg-blue-100 hover:scale-y-110 cursor-pointer'
+                            }`}
+                            title={res ? `${res.user_name} 님 예약 중` : `${t % 1 === 0 ? t + ':00' : Math.floor(t) + ':30'} 이용 가능`}
+                          >
+                            {isHour && (
+                              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-[1px] h-1 bg-gray-300"></div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
@@ -181,7 +189,7 @@ export default function ReservationPage() {
                     <div className="grid grid-cols-2 gap-3">
                       <input type="text" placeholder="이름" className="p-4 bg-white rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm border border-gray-100" 
                         onChange={(e) => setFormData({...formData, name: e.target.value})} />
-                      <input type="text" placeholder="학번 (10자리)" className="p-4 bg-white rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm border border-gray-100" 
+                      <input type="text" placeholder="학번" className="p-4 bg-white rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm border border-gray-100" 
                         onChange={(e) => setFormData({...formData, studentId: e.target.value})} />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
@@ -210,11 +218,6 @@ export default function ReservationPage() {
             );
           })}
         </section>
-
-        <div className="flex justify-center gap-4 mt-6 text-[11px] font-bold text-gray-400 uppercase">
-           <div className="flex items-center gap-1.5"><div className="w-3 h-3 bg-white border border-gray-200 rounded-sm"></div> 예약가능</div>
-           <div className="flex items-center gap-1.5"><div className="w-3 h-3 bg-gray-300 rounded-sm"></div> 예약불가</div>
-        </div>
       </div>
     </main>
   );
