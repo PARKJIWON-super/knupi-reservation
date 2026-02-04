@@ -161,24 +161,34 @@ export default function ReservationPage() {
 
                     <div className="relative h-8 bg-gray-100 rounded-xl p-1 shadow-inner flex gap-[2px]">
                       {timeSlots.map((t) => {
-                        const res = getReservationInfo(piano, t);
-                        const isHour = t % 1 === 0;
-                        return (
-                          <div
-                            key={t}
-                            className={`relative flex-1 rounded-sm transition-all duration-200 ${
-                              res 
-                                ? 'bg-gray-400 shadow-sm cursor-not-allowed' 
-                                : 'bg-white hover:bg-blue-100 hover:scale-y-110 cursor-pointer'
-                            }`}
-                            title={res ? `${res.user_name} 님 예약 중` : `${t % 1 === 0 ? t + ':00' : Math.floor(t) + ':30'} 이용 가능`}
-                          >
-                            {isHour && (
-                              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-[1px] h-1 bg-gray-300"></div>
-                            )}
-                          </div>
-                        );
-                      })}
+  const res = getReservationInfo(piano, t);
+  const isHour = t % 1 === 0;
+
+  // 툴팁에 표시할 시간 범위 계산
+  const startTime = t % 1 === 0 ? `${t}:00` : `${Math.floor(t)}:30`;
+  const endTimeNum = t + 0.5;
+  const endTime = endTimeNum % 1 === 0 ? `${endTimeNum}:00` : `${Math.floor(endTimeNum)}:30`;
+
+  return (
+    <div
+      key={t}
+      className={`relative flex-1 rounded-sm transition-all duration-200 ${
+        res 
+          ? 'bg-gray-400 shadow-sm cursor-not-allowed' 
+          : 'bg-white hover:bg-blue-100 hover:scale-y-110 cursor-pointer'
+      }`}
+      // ★ 이 부분을 수정합니다 ★
+      title={res 
+        ? `${res.user_name} 님 예약 중 (${startTime} - ${endTime})` 
+        : `${startTime} - ${endTime} 이용 가능`
+      }
+    >
+      {isHour && (
+        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-[1px] h-1 bg-gray-300"></div>
+      )}
+    </div>
+  );
+})}
                     </div>
                   </div>
                 </div>
