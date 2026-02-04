@@ -11,11 +11,13 @@ export default function ReservationPage() {
   const [dbReservations, setDbReservations] = useState<any[]>([]);
   const [currentTime, setCurrentTime] = useState(new Date());
 
+  // 실시간 시계 업데이트
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
+  // 14일치 날짜 데이터 생성
   const dates = Array.from({ length: 14 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() + i);
@@ -106,8 +108,8 @@ export default function ReservationPage() {
 
   return (
     <main className="min-h-screen bg-[#F8F9FA] pb-20 font-sans text-[#1A1F27]">
-      {/* 헤더 */}
-      <div className="bg-white border-b border-gray-100 sticky top-0 z-20 px-4 py-3 flex items-center justify-between">
+      {/* 헤더 섹션 */}
+      <div className="bg-white border-b border-gray-100 sticky top-0 z-20 px-4 py-3 flex items-center justify-between shadow-sm">
         <Link href="/" className="p-2 hover:bg-gray-50 rounded-full transition-colors">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -118,9 +120,9 @@ export default function ReservationPage() {
       </div>
 
       <div className="max-w-2xl mx-auto px-4 mt-6">
-        {/* 1. 날짜 선택 섹션 (상단으로 이동 및 월 표시 개선) */}
+        {/* 1. 날짜 선택 섹션 */}
         <section className="mb-4 overflow-x-auto scrollbar-hide">
-          <div className="flex gap-3 pb-2">
+          <div className="flex gap-3 pb-2 px-1">
             {dates.map((d) => (
               <button 
                 key={d.fullDate} 
@@ -128,10 +130,9 @@ export default function ReservationPage() {
                 className={`flex-shrink-0 w-16 py-4 rounded-[22px] flex flex-col items-center transition-all duration-300 ${
                   selectedDate === d.fullDate 
                   ? 'bg-blue-600 text-white shadow-xl scale-105' 
-                  : 'bg-white text-gray-400 border border-gray-100'
+                  : 'bg-white text-gray-400 border border-gray-100 shadow-sm'
                 }`}
               >
-                {/* 월 정보를 상단에 아주 작게 배치하여 깔끔하게 변경 */}
                 <span className="text-[9px] font-bold mb-0.5 opacity-60 leading-none">{d.month}월</span>
                 <span className="text-[11px] font-bold mb-1">{d.day}</span>
                 <span className="text-xl font-extrabold">{d.date}</span>
@@ -140,25 +141,25 @@ export default function ReservationPage() {
           </div>
         </section>
 
-        {/* 2. 현재 시간 및 범례 표시 섹션 (날짜 밑으로 이동) */}
+        {/* 2. 현재 시간 및 범례 표시 섹션 (날짜 아래 배치) */}
         <div className="flex items-center justify-between mb-8 px-1">
           <div className="bg-white px-4 py-2 rounded-2xl flex items-center gap-2 shadow-sm border border-gray-100">
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-            <span className="text-[11px] font-bold text-blue-600">
+            <span className="text-[11px] font-bold text-blue-600 tracking-tight">
               {currentTime.getHours()}시 {currentTime.getMinutes()}분 {currentTime.getSeconds()}초
             </span>
           </div>
-          <div className="flex gap-4 text-[11px] font-bold text-gray-400">
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 bg-gray-400 rounded-full"></div> 예약됨
+          <div className="flex gap-4 text-[11px] font-bold">
+            <div className="flex items-center gap-1.5 text-gray-500">
+              <div className="w-3 h-3 bg-white border border-gray-200 rounded-sm"></div> 사용가능
             </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 bg-[#334155] rounded-full"></div> 사용불가
+            <div className="flex items-center gap-1.5 text-gray-500">
+              <div className="w-3 h-3 bg-gray-400 rounded-sm"></div> 예약됨
             </div>
           </div>
         </div>
 
-        {/* 연습실 목록 섹션 */}
+        {/* 연습실 목록 */}
         <section className="space-y-6">
           {pianos.map((piano, idx) => {
             const isOpen = activePiano === piano;
@@ -199,7 +200,7 @@ export default function ReservationPage() {
                             className={`relative flex-1 rounded-md transition-all duration-200 ${
                               res 
                                 ? 'bg-gray-400 shadow-sm cursor-not-allowed' 
-                                : 'bg-white hover:bg-blue-100 hover:scale-y-110 cursor-pointer border border-gray-50'
+                                : 'bg-white hover:bg-blue-100 hover:scale-y-110 cursor-pointer border border-gray-100/50'
                             }`}
                             title={res ? `${res.user_name} 님 예약 중 (${startTime}-${endTime})` : `${startTime} - ${endTime} 이용 가능`}
                           >
@@ -223,13 +224,13 @@ export default function ReservationPage() {
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="flex flex-col gap-2">
-                        <label className="text-[11px] font-bold text-gray-400 ml-1">시작 시간</label>
+                        <label className="text-[11px] font-bold text-gray-400 ml-1 uppercase">Start Time</label>
                         <select className="p-4 bg-white rounded-2xl outline-none text-sm border border-gray-100 shadow-sm" value={formData.start} onChange={(e) => setFormData({...formData, start: Number(e.target.value)})}>
                           {timeSlots.map(t => <option key={t} value={t}>{t % 1 === 0 ? `${t}:00` : `${Math.floor(t)}:30`}</option>)}
                         </select>
                       </div>
                       <div className="flex flex-col gap-2">
-                        <label className="text-[11px] font-bold text-gray-400 ml-1">종료 시간</label>
+                        <label className="text-[11px] font-bold text-gray-400 ml-1 uppercase">End Time</label>
                         <select className="p-4 bg-white rounded-2xl outline-none text-sm border border-gray-100 shadow-sm" value={formData.end} onChange={(e) => setFormData({...formData, end: Number(e.target.value)})}>
                           {endSlots.map(t => <option key={t} value={t}>{t === 24 ? '24:00' : (t % 1 === 0 ? `${t}:00` : `${Math.floor(t)}:30`)}</option>)}
                         </select>
