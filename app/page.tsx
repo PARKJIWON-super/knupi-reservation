@@ -12,7 +12,6 @@ export default function Home() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [rankings, setRankings] = useState<{name: string, total: number}[]>([]);
   
-  // ★ 현재 월 구하기 (예: 2월)
   const currentMonth = new Date().getMonth() + 1;
 
   const formatTime = (time: number) => {
@@ -95,10 +94,9 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 🏆 월별 예약왕 대시보드 (자동 명칭 변경) */}
+      {/* 🏆 월별 예약왕 대시보드 */}
       <div className="w-full max-w-md bg-white rounded-2xl shadow-sm p-6 mb-4 border border-gray-100">
         <div className="flex justify-between items-end mb-4">
-          {/* ★ 이 부분이 매달 자동으로 바뀝니다 ★ */}
           <h3 className="font-bold text-gray-800">🏆 {currentMonth}월의 연습왕 TOP 3</h3>
           <span className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">
             {new Date().toLocaleString('en-US', { month: 'long' })} {new Date().getFullYear()}
@@ -139,15 +137,27 @@ export default function Home() {
         {!rankings.length && <p className="text-center text-xs text-gray-300 py-4 font-bold">이번 달 데이터 집계 중...</p>}
       </div>
 
-      {/* 주의사항 섹션 */}
+      {/* 주의사항 섹션 (수정된 부분) */}
       <div className="w-full max-w-md bg-white rounded-2xl shadow-sm p-6 mb-4 border border-gray-100">
         <div className="flex items-center gap-2 mb-3">
           <span className="text-red-500 text-lg">⚠️</span>
           <h3 className="font-bold text-gray-800">이용 주의사항</h3>
         </div>
-        <ul className="space-y-2 text-sm text-gray-600 font-medium text-center">
+        <ul className="space-y-3 text-sm text-gray-600 font-medium text-center">
           <li className="flex gap-2 justify-center"><span className="text-blue-500">•</span><span>음식물 반입 금지 및 뒷정리 필수</span></li>
           <li className="flex gap-2 justify-center"><span className="text-blue-500">•</span><span>노쇼 시 향후 이용이 제한될 수 있습니다.</span></li>
+          <hr className="border-gray-100 my-2" />
+          <li className="flex flex-col gap-1">
+            <span className="text-xs text-gray-400 font-bold">문의: 크누피 집행부</span>
+            <a 
+              href="https://open.kakao.com/o/s5DRwRei" // 여기에 실제 오픈채팅 주소를 넣어주세요
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-blue-600 font-bold underline decoration-blue-200 underline-offset-4 hover:text-blue-800 transition-colors"
+            >
+              사이소리함 (카카오톡 채팅)
+            </a>
+          </li>
         </ul>
       </div>
 
