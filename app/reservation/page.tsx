@@ -9,236 +9,157 @@ export default function ReservationPage() {
   const timeSlots = Array.from({ length: 30 }, (_, i) => 9 + i * 0.5);
 
   const [dbReservations, setDbReservations] = useState<any[]>([]);
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const [activePiano, setActivePiano] = useState<string | null>(null);
 
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const dates = Array.from({ length: 14 }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() + i);
+  // 날짜 생성 (Feb, 2026 형식 대응)
+  const dates = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(2026, 1, i + 1); // 2026년 2월 기준 데이터 예시
     const dateString = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     return {
-      month: d.getMonth() + 1,
-      day: d.toLocaleDateString('ko-KR', { weekday: 'short' }),
-      date: d.getDate(),
+      dayNum: String(d.getDate()).padStart(2, '0'),
+      dayName: d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase(),
       fullDate: dateString
     };
   });
 
-  const [selectedDate, setSelectedDate] = useState(dates[0].fullDate);
-  const [activePiano, setActivePiano] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState(dates[1].fullDate); // 02일 기준
 
   const [formData, setFormData] = useState({
-    name: '',
-    studentId: '',
-    phone: '',
-    start: 9,
-    end: 9.5
+    name: '', studentId: '', phone: '', start: 9, end: 9.5
   });
 
   const fetchReservations = async () => {
-    const { data, error } = await supabase.from('reservations').select('*');
-    if (error) console.error('불러오기 에러:', error);
-    else setDbReservations(data || []);
+    const { data } = await supabase.from('reservations').select('*');
+    setDbReservations(data || []);
   };
 
-  useEffect(() => {
-    fetchReservations();
-  }, [selectedDate]);
+  useEffect(() => { fetchReservations(); }, [selectedDate]);
 
   const handleReserve = async (pianoName: string) => {
-    if (!formData.name || !formData.studentId) {
-      alert("이름과 학번을 입력해주세요!");
-      return;
-    }
-    if (formData.start >= formData.end) {
-      alert("종료 시간은 시작 시간보다 늦어야 합니다.");
-      return;
-    }
-
-    const isOverlap = dbReservations.some(res => {
-      return (
-        res.piano_name === pianoName &&
-        String(res.data) === String(selectedDate) &&
-        formData.start < res.end_time && 
-        formData.end > res.start_time
-      );
-    });
-
-    if (isOverlap) {
-      alert("죄송합니다. 선택하신 시간대에 이미 예약이 존재합니다.");
-      return;
-    }
-
-    const { error } = await supabase.from('reservations').insert([
-      { 
-        user_name: formData.name, 
-        student_id: formData.studentId, 
-        phone: formData.phone,
-        piano_name: pianoName,
-        data: selectedDate,
-        start_time: Number(formData.start),
-        end_time: Number(formData.end)
-      }
-    ]);
-
-    if (error) {
-      alert("예약 중 오류가 발생했습니다.");
-    } else {
-      alert("🎉 예약이 성공적으로 완료되었습니다!");
-      setActivePiano(null);
-      fetchReservations();
-    }
+    if (!formData.name || !formData.studentId) return alert("정보를 입력해주세요.");
+    const { error } = await supabase.from('reservations').insert([{ 
+      user_name: formData.name, student_id: formData.studentId, 
+      piano_name: pianoName, data: selectedDate,
+      start_time: Number(formData.start), end_time: Number(formData.end)
+    }]);
+    if (!error) { alert("🎉 예약 성공!"); setActivePiano(null); fetchReservations(); }
   };
-
-  const getReservationInfo = (pianoName: string, time: number) => {
-    return dbReservations.find(res => 
-      res.piano_name === pianoName && 
-      String(res.data) === String(selectedDate) && 
-      time >= res.start_time && time < res.end_time
-    );
-  };
-
-  const endSlots = Array.from({ length: 31 }, (_, i) => 9.5 + i * 0.5).filter(t => t <= 24);
 
   return (
-    <main className="min-h-screen bg-[#F8F9FA] pb-20 font-sans text-[#1A1F27]">
-      <div className="bg-white border-b border-gray-100 sticky top-0 z-20 px-4 py-3 flex items-center justify-between shadow-sm">
-        <Link href="/" className="p-2 hover:bg-gray-50 rounded-full transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-          </svg>
-        </Link>
-        <h1 className="text-lg font-bold">날짜 및 연습실 선택</h1>
-        <div className="w-10"></div>
-      </div>
+    <main className="min-h-screen bg-[#F9FAFB] font-['Pretendard'] text-[#1A1A1A] flex flex-col items-center overflow-x-hidden pb-20">
+      
+      {/* 🎨 상단 헤더 & 그래디언트 배경 (Rectangle 404 기반) */}
+      <div 
+        className="w-full max-w-[480px] h-[310px] absolute top-[-12px] rounded-[15px] z-0 shadow-sm"
+        style={{ background: 'radial-gradient(137.53% 99.23% at 92.41% 7.26%, #FFF5E4 0%, #C7D4F4 100%)' }}
+      />
 
-      <div className="max-w-2xl mx-auto px-4 mt-6">
-        {/* 1. 날짜 선택 섹션 (수 / 2/4 형식으로 변경) */}
-        <section className="mb-4 overflow-x-auto scrollbar-hide">
-          <div className="flex gap-3 pb-2 px-1">
-            {dates.map((d) => (
-              <button 
-                key={d.fullDate} 
-                onClick={() => { setSelectedDate(d.fullDate); setActivePiano(null); }}
-                className={`flex-shrink-0 w-16 py-5 rounded-[22px] flex flex-col items-center justify-center transition-all duration-300 ${
-                  selectedDate === d.fullDate 
-                  ? 'bg-blue-600 text-white shadow-xl scale-105' 
-                  : 'bg-white text-gray-400 border border-gray-100 shadow-sm'
-                }`}
-              >
-                <span className={`text-[12px] font-bold mb-1 ${selectedDate === d.fullDate ? 'text-white' : 'text-gray-500'}`}>
-                  {d.day}
-                </span>
-                <span className="text-[14px] font-extrabold tracking-tight">
-                  {d.month}/{d.date}
-                </span>
-              </button>
-            ))}
-          </div>
-        </section>
+      <div className="w-full max-w-[480px] px-[20px] relative z-10">
+        {/* 상단 타이틀 바 (Frame 159) */}
+        <div className="flex justify-between items-center pt-[64px] mb-[38px]">
+          <h1 className="text-[32px] font-bold tracking-[-0.03em]">Calendar</h1>
+          <Link href="/" className="w-[31px] h-[32px] flex items-center justify-center bg-[#1C1B1F] rounded-md">
+             <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+          </Link>
+        </div>
 
-        {/* 2. 현재 시간 및 범례 표시 섹션 */}
-        <div className="flex items-center justify-between mb-8 px-1">
-          <div className="bg-white px-4 py-2 rounded-2xl flex items-center gap-2 shadow-sm border border-gray-100">
-            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-            <span className="text-[11px] font-bold text-blue-600 tracking-tight">
-              현재 시간: {currentTime.getHours()}시 {currentTime.getMinutes()}분 {currentTime.getSeconds()}초
-            </span>
-          </div>
-          <div className="flex gap-4 text-[11px] font-bold">
-            <div className="flex items-center gap-1.5 text-gray-500">
-              <div className="w-3 h-3 bg-white border border-gray-200 rounded-sm"></div> 이용 가능
-            </div>
-            <div className="flex items-center gap-1.5 text-gray-500">
-              <div className="w-3 h-3 bg-gray-400 rounded-sm"></div> 예약됨
-            </div>
+        {/* 월 표시 및 화살표 (Frame 158) */}
+        <div className="flex justify-between items-center mb-[18px]">
+          <span className="text-[24px] font-semibold tracking-[-0.03em]">Feb, 2026</span>
+          <div className="flex gap-[18px]">
+            <button className="w-6 h-6 rotate-180"><svg viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2"><path d="M9 5l7 7-7 7"/></svg></button>
+            <button className="w-6 h-6"><svg viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2"><path d="M9 5l7 7-7 7"/></svg></button>
           </div>
         </div>
 
-        {/* 연습실 목록 */}
-        <section className="space-y-6">
-          {pianos.map((piano, idx) => {
+        {/* 📅 날짜 선택 가로 스크롤 (Frame 156) */}
+        <div className="flex gap-[32px] overflow-x-auto pb-4 scrollbar-hide">
+          {dates.map((d) => (
+            <button 
+              key={d.fullDate}
+              onClick={() => setSelectedDate(d.fullDate)}
+              className={`flex flex-col items-center min-w-[32px] transition-all ${
+                selectedDate === d.fullDate 
+                ? 'bg-white/45 p-[13px_8px] rounded-[8px] -mt-[13px]' 
+                : ''
+              }`}
+            >
+              <span className={`text-[20px] font-semibold leading-[24px] ${selectedDate === d.fullDate ? 'text-black' : 'text-[#808080]'}`}>
+                {d.dayNum}
+              </span>
+              <span className={`text-[16px] font-semibold ${selectedDate === d.fullDate ? 'text-[#666666]' : 'text-[#B2B2B2]'}`}>
+                {d.dayName}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        {/* 📍 배치도 드롭다운 버튼 (Frame 152) */}
+        <div className="mt-[65px] flex justify-center mb-[30px]">
+          <button className="flex items-center gap-[7px] bg-[#C7D4F4] px-[20px] py-[10px] rounded-[47px] shadow-sm hover:scale-105 transition-transform">
+            <span className="text-[20px] font-semibold tracking-[-0.03em]">피아노 배치도</span>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M7 10l5 5 5-5H7z" fill="black"/></svg>
+          </button>
+        </div>
+
+        {/* 범례 표시 (Frame 95) */}
+        <div className="flex justify-end gap-[16px] mb-[15px] px-1">
+          <div className="flex items-center gap-[3px]">
+            <div className="w-[9px] h-[9px] bg-[#C7D4F4]/40 rounded-full"></div>
+            <span className="text-[16px] font-normal tracking-[-0.03em]">예약 가능</span>
+          </div>
+          <div className="flex items-center gap-[3px]">
+            <div className="w-[9px] h-[9px] bg-[#C7D4F4] rounded-full"></div>
+            <span className="text-[16px] font-normal tracking-[-0.03em]">예약 불가</span>
+          </div>
+        </div>
+
+        {/* 🎹 피아노 목록 (Frame 145/134 계열) */}
+        <div className="flex flex-col gap-[32px]">
+          {pianos.map((piano) => {
             const isOpen = activePiano === piano;
             return (
-              <div key={piano} className={`bg-white rounded-[32px] overflow-hidden shadow-sm border-2 transition-all duration-300 ${isOpen ? 'border-blue-500 ring-4 ring-blue-50' : 'border-gray-100'}`}>
-                <div className="p-6">
-                  <div className="flex justify-between items-center mb-6">
-                    <div className="flex items-center gap-4">
-                      <div className="w-11 h-11 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-lg">{idx + 1}</div>
-                      <h3 className="font-extrabold text-lg text-gray-800">{piano}</h3>
-                    </div>
-                    <button 
-                      onClick={() => setActivePiano(isOpen ? null : piano)}
-                      className={`px-6 py-2.5 rounded-2xl text-xs font-bold transition-all ${isOpen ? 'bg-gray-100 text-gray-500' : 'bg-blue-600 text-white shadow-lg'}`}
-                    >
-                      {isOpen ? '닫기' : '선택'}
-                    </button>
+              <div key={piano} className="w-full bg-white rounded-[15px] p-[20px_20px_15px] shadow-[0_0_6.5px_rgba(0,0,0,0.12)]">
+                <div className="flex justify-between items-center mb-[15px]">
+                  <h3 className="text-[20px] font-semibold tracking-[-0.03em]">{piano}</h3>
+                  <button 
+                    onClick={() => setActivePiano(isOpen ? null : piano)}
+                    className="bg-[#C7D4F4] px-[20px] py-[5px] rounded-[20px] text-[16px] font-semibold"
+                  >
+                    {isOpen ? '닫기' : '선택'}
+                  </button>
+                </div>
+
+                {/* 📊 타임라인 바 (Group 2 디자인 재현) */}
+                <div className="relative w-full h-[45px] bg-white rounded-[15px] border border-gray-50 overflow-hidden">
+                  {/* 시간 숫자 표시 */}
+                  <div className="flex justify-between px-2 pt-1 text-[14px] text-[#999999] font-semibold">
+                    {[9, 12, 15, 18, 21, 24].map(h => <span key={h}>{h}</span>)}
                   </div>
-
-                  <div className="relative mt-2 px-1">
-                    <div className="flex justify-between mb-3 text-[10px] text-gray-400 font-bold px-1">
-                      {Array.from({ length: 16 }, (_, i) => 9 + i).map((hour) => (
-                        <span key={hour} className="w-0 flex justify-center">{hour}</span>
-                      ))}
-                    </div>
-
-                    <div className="relative h-10 bg-gray-50 rounded-2xl p-1.5 shadow-inner flex gap-[2px]">
-                      {timeSlots.map((t) => {
-                        const res = getReservationInfo(piano, t);
-                        const isHour = t % 1 === 0;
-                        const startTime = t % 1 === 0 ? `${t}:00` : `${Math.floor(t)}:30`;
-                        const endTimeNum = t + 0.5;
-                        const endTime = endTimeNum === 24 ? '24:00' : (endTimeNum % 1 === 0 ? `${endTimeNum}:00` : `${Math.floor(endTimeNum)}:30`);
-
-                        return (
-                          <div
-                            key={t}
-                            className={`relative flex-1 rounded-md transition-all duration-200 ${
-                              res 
-                                ? 'bg-gray-400 shadow-sm cursor-not-allowed' 
-                                : 'bg-white hover:bg-blue-100 hover:scale-y-110 cursor-pointer border border-gray-100/50'
-                            }`}
-                            title={res ? `${res.user_name} 님 예약 중 (${startTime}-${endTime})` : `${startTime} - ${endTime} 이용 가능`}
-                          >
-                            {isHour && (
-                              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-[1.5px] h-1.5 bg-gray-300 rounded-full"></div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
+                  {/* 슬롯 바 배경 */}
+                  <div className="absolute bottom-2 left-2 right-2 h-[12px] bg-[#C7D4F4]/40 rounded-full flex gap-[1px]">
+                    {timeSlots.map(t => {
+                      const res = dbReservations.find(r => r.piano_name === piano && String(r.data) === selectedDate && t >= r.start_time && t < r.end_time);
+                      return (
+                        <div 
+                          key={t} 
+                          className={`flex-1 h-full first:rounded-l-full last:rounded-r-full ${res ? 'bg-[#C7D4F4]' : 'bg-transparent'}`}
+                        />
+                      );
+                    })}
                   </div>
                 </div>
 
+                {/* 예약 폼 (선택 시 노출) */}
                 {isOpen && (
-                  <div className="bg-[#F8F9FF] p-8 border-t border-blue-50 space-y-6 animate-in slide-in-from-top-4 duration-500">
-                    <div className="grid grid-cols-2 gap-4">
-                      <input type="text" placeholder="이름" className="p-4 bg-white rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 text-sm border border-gray-100 shadow-sm" 
-                        onChange={(e) => setFormData({...formData, name: e.target.value})} />
-                      <input type="text" placeholder="학번" className="p-4 bg-white rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 text-sm border border-gray-100 shadow-sm" 
-                        onChange={(e) => setFormData({...formData, studentId: e.target.value})} />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="flex flex-col gap-2">
-                        <label className="text-[11px] font-bold text-gray-400 ml-1 uppercase">Start Time</label>
-                        <select className="p-4 bg-white rounded-2xl outline-none text-sm border border-gray-100 shadow-sm" value={formData.start} onChange={(e) => setFormData({...formData, start: Number(e.target.value)})}>
-                          {timeSlots.map(t => <option key={t} value={t}>{t % 1 === 0 ? `${t}:00` : `${Math.floor(t)}:30`}</option>)}
-                        </select>
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <label className="text-[11px] font-bold text-gray-400 ml-1 uppercase">End Time</label>
-                        <select className="p-4 bg-white rounded-2xl outline-none text-sm border border-gray-100 shadow-sm" value={formData.end} onChange={(e) => setFormData({...formData, end: Number(e.target.value)})}>
-                          {endSlots.map(t => <option key={t} value={t}>{t === 24 ? '24:00' : (t % 1 === 0 ? `${t}:00` : `${Math.floor(t)}:30`)}</option>)}
-                        </select>
-                      </div>
+                  <div className="mt-6 pt-6 border-t border-gray-100 flex flex-col gap-4 animate-in fade-in slide-in-from-top-2">
+                    <div className="grid grid-cols-2 gap-3">
+                      <input type="text" placeholder="이름" className="p-3 bg-[#F3F6FC] rounded-lg text-sm outline-none" onChange={(e) => setFormData({...formData, name: e.target.value})} />
+                      <input type="text" placeholder="학번" className="p-3 bg-[#F3F6FC] rounded-lg text-sm outline-none" onChange={(e) => setFormData({...formData, studentId: e.target.value})} />
                     </div>
                     <button 
                       onClick={() => handleReserve(piano)}
-                      className="w-full bg-blue-600 text-white font-bold py-5 rounded-[22px] shadow-xl shadow-blue-200 active:scale-[0.97] transition-all text-base"
+                      className="w-full bg-[#1A1A1A] text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition-all"
                     >
                       예약 신청하기
                     </button>
@@ -247,7 +168,14 @@ export default function ReservationPage() {
               </div>
             );
           })}
-        </section>
+        </div>
+
+        {/* 👣 푸터 (Figma Footer 기반) */}
+        <footer className="text-center mt-20 pb-10">
+          <p className="text-[12px] font-light tracking-[0.04em] text-[#999999]">
+            © KYUNGPOOK NATIONAL UNIV. PIANO CLUB KNUPI
+          </p>
+        </footer>
       </div>
     </main>
   );
