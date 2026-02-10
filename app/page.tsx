@@ -80,129 +80,139 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 flex flex-col items-center p-4 font-sans text-[#1A1F27]">
-      {/* 헤더 섹션 */}
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-sm p-6 mb-4 flex items-center gap-4 border border-gray-100">
-        <div className="bg-blue-600 p-3 rounded-xl text-white">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 10l12-3" />
-          </svg>
-        </div>
-        <div>
-          <h1 className="text-xl font-bold tracking-tight">크누피 연습실 예약</h1>
-          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest text-center">KNUPI Practice Room</p>
+    <main className="min-h-screen bg-[#F3F6FC] font-['Pretendard'] text-[#1A1A1A]">
+      {/* 🎨 피그마 상단 그라데이션 영역 (Rectangle 404) */}
+      <div 
+        className="w-full max-w-[480px] mx-auto pt-16 pb-24 px-8 relative overflow-hidden"
+        style={{
+          background: 'radial-gradient(137.53% 99.23% at 92.41% 7.26%, #FFF5E4 0%, #C7D4F4 100%)',
+          borderRadius: '0 0 15px 15px'
+        }}
+      >
+        <div className="relative z-10">
+          <h1 className="text-[32px] font-bold leading-[38px] tracking-[-0.03em] mb-1">
+            Knupi Reservation
+          </h1>
+          <p className="text-[16px] font-normal leading-[19px] tracking-[-0.03em] text-[#383838]">
+            크누피 연습실 예약
+          </p>
         </div>
       </div>
 
-      {/* 🏆 월별 예약왕 대시보드 */}
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-sm p-6 mb-4 border border-gray-100">
-        <div className="flex justify-between items-end mb-4">
-          <h3 className="font-bold text-gray-800">🏆 {currentMonth}월의 연습왕 TOP 3</h3>
-          <span className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">
-            {new Date().toLocaleString('en-US', { month: 'long' })} {new Date().getFullYear()}
-          </span>
-        </div>
-        <div className="flex justify-around items-end gap-2 pt-4">
-          {rankings[1] && (
-            <div className="flex flex-col items-center flex-1">
-              <span className="text-2xl mb-1">🥈</span>
-              <div className="w-full bg-gray-50 rounded-t-lg p-2 text-center border-x border-t border-gray-100">
-                <p className="text-xs font-bold text-gray-700 truncate">{rankings[1].name}</p>
-                <p className="text-[10px] text-blue-500 font-bold">{rankings[1].total}시간</p>
+      {/* 컨텐츠 레이아웃 (Frame 161 간격 적용) */}
+      <div className="w-full max-w-[444px] mx-auto -mt-16 px-4 flex flex-col gap-[65px] pb-20 relative z-20">
+        
+        {/* 예약 서비스 섹션 (Frame 77) */}
+        <section className="flex flex-col gap-3">
+          <h2 className="text-lg font-bold px-1">예약 서비스</h2>
+          <Link href="/reservation">
+            <div className="bg-white rounded-[15px] p-6 flex justify-between items-center shadow-[0_4px_20px_rgba(0,0,0,0.05)] hover:bg-gray-50 transition-all group">
+              <div>
+                <h3 className="text-lg font-bold mb-1">연습실 예약하기</h3>
+                <p className="text-sm text-[#999999] font-medium">실시간 현황 확인 및 예약</p>
               </div>
-              <div className="w-full h-12 bg-gray-100 rounded-b-md"></div>
-            </div>
-          )}
-          {rankings[0] && (
-            <div className="flex flex-col items-center flex-1">
-              <span className="text-3xl mb-1">🥇</span>
-              <div className="w-full bg-blue-50 rounded-t-lg p-3 text-center border-x border-t border-blue-100 relative">
-                <p className="text-sm font-black text-blue-700 truncate">{rankings[0].name}</p>
-                <p className="text-[11px] text-blue-600 font-black">{rankings[0].total}시간</p>
+              <div className="text-gray-300 group-hover:text-blue-600 transition-colors">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/></svg>
               </div>
-              <div className="w-full h-20 bg-blue-600 rounded-b-md shadow-lg shadow-blue-100"></div>
             </div>
-          )}
-          {rankings[2] && (
-            <div className="flex flex-col items-center flex-1">
-              <span className="text-2xl mb-1">🥉</span>
-              <div className="w-full bg-orange-50/30 rounded-t-lg p-2 text-center border-x border-t border-orange-100">
-                <p className="text-xs font-bold text-gray-700 truncate">{rankings[2].name}</p>
-                <p className="text-[10px] text-orange-500 font-bold">{rankings[2].total}시간</p>
-              </div>
-              <div className="w-full h-8 bg-orange-100/50 rounded-b-md"></div>
+          </Link>
+          <div 
+            onClick={() => { setShowLookup(!showLookup); setMyReservations([]); setIsAdmin(false); }}
+            className="bg-white rounded-[15px] p-6 flex justify-between items-center shadow-[0_4px_20px_rgba(0,0,0,0.05)] cursor-pointer hover:bg-gray-50 transition-all group"
+          >
+            <div>
+              <h3 className="text-lg font-bold mb-1">내 예약 확인하기</h3>
+              <p className="text-sm text-[#999999] font-medium">이름과 학번으로 조회</p>
             </div>
-          )}
-        </div>
-        {!rankings.length && <p className="text-center text-xs text-gray-300 py-4 font-bold">이번 달 데이터 집계 중...</p>}
-      </div>
-
-      {/* 주의사항 섹션 (수정된 부분) */}
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-sm p-6 mb-4 border border-gray-100">
-        <div className="flex items-center gap-2 mb-3">
-          <span className="text-red-500 text-lg">⚠️</span>
-          <h3 className="font-bold text-gray-800">이용 주의사항</h3>
-        </div>
-        <ul className="space-y-3 text-sm text-gray-600 font-medium text-center">
-          <li className="flex gap-2 justify-center"><span className="text-blue-500">•</span><span>음식물 반입 금지 및 뒷정리 필수</span></li>
-          <li className="flex gap-2 justify-center"><span className="text-blue-500">•</span><span>노쇼 시 향후 이용이 제한될 수 있습니다.</span></li>
-          <hr className="border-gray-100 my-2" />
-          <li className="flex flex-col gap-1">
-            <span className="text-xs text-gray-400 font-bold">문의: 크누피 집행부</span>
-            <a 
-              href="https://open.kakao.com/o/s5DRwRei" // 여기에 실제 오픈채팅 주소를 넣어주세요
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-blue-600 font-bold underline decoration-blue-200 underline-offset-4 hover:text-blue-800 transition-colors"
-            >
-              사이소리함 (카카오톡 채팅)
-            </a>
-          </li>
-        </ul>
-      </div>
-
-      {/* 예약하기 버튼 */}
-      <Link href="/reservation" className="w-full max-w-md mb-4">
-        <div className="bg-blue-600 rounded-2xl p-6 text-white flex justify-between items-center hover:bg-blue-700 transition-all shadow-lg shadow-blue-100">
-          <div><h2 className="text-xl font-bold">연습실 예약하기</h2><p className="text-sm opacity-80 font-medium">실시간 현황 확인 및 예약</p></div>
-          <div className="bg-white/20 rounded-full p-2">→</div>
-        </div>
-      </Link>
-
-      {/* 내 예약 확인하기 버튼 */}
-      <div onClick={() => { setShowLookup(!showLookup); setMyReservations([]); setIsAdmin(false); }}
-        className="w-full max-w-md bg-white rounded-2xl p-6 mb-4 flex justify-between items-center cursor-pointer border border-gray-200">
-        <div><h2 className="text-lg font-bold text-gray-700">내 예약 확인하기</h2><p className="text-sm text-gray-400 font-medium">오늘부터의 예약 조회 및 취소</p></div>
-        <div className="bg-gray-100 rounded-full p-2 text-gray-500">🔍</div>
-      </div>
-
-      {showLookup && (
-        <div className="w-full max-w-md bg-blue-50 rounded-2xl p-6 mb-4 border border-blue-100 animate-in fade-in slide-in-from-top-4 duration-300">
-          <div className="space-y-3">
-            <input type="text" placeholder="이름" className="w-full p-4 rounded-xl border-0 text-sm bg-white outline-none" onChange={(e) => setInfo({...info, name: e.target.value})} />
-            <input type="text" placeholder="학번" className="w-full p-4 rounded-xl border-0 text-sm bg-white outline-none" onChange={(e) => setInfo({...info, studentId: e.target.value})} />
-            <button onClick={handleSearch} disabled={isSearching} className="w-full bg-blue-600 text-white font-bold py-4 rounded-xl text-sm shadow-md">{isSearching ? '조회 중...' : '조회하기'}</button>
-            <div className="mt-6 space-y-3">
-              {myReservations.map((res) => (
-                <div key={res.id} className="bg-white p-5 rounded-2xl shadow-sm flex justify-between items-center border border-blue-50">
-                  <div>
-                    <span className="text-[10px] font-bold text-blue-600 block mb-1 uppercase tracking-tighter">{res.piano_name}</span>
-                    <p className="text-sm font-bold text-gray-800">{isAdmin ? `👤 ${res.user_name} | ` : ""}{res.data} 예약</p>
-                    <p className="text-[11px] text-gray-400 font-medium">
-                      {formatTime(res.start_time)} - {formatTime(res.end_time)}
-                    </p>
-                  </div>
-                  <button onClick={() => handleDelete(res.id)} className="text-red-500 text-xs font-bold px-3 py-2 hover:bg-red-50 rounded-xl transition-colors">{isAdmin ? "강제취소" : "취소하기"}</button>
-                </div>
-              ))}
+            <div className="text-gray-300 group-hover:text-blue-600 transition-colors">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/></svg>
             </div>
           </div>
-        </div>
-      )}
 
-      <footer className="mt-auto py-10 text-[10px] text-gray-300 font-bold tracking-widest uppercase">
-        © KYUNGPOOK NATIONAL UNIV. PIANO CLUB KNUPI
-      </footer>
+          {/* 조회 창 (디자인 통합) */}
+          {showLookup && (
+            <div className="mt-2 p-6 bg-[#C7D4F4]/20 rounded-[15px] border border-[#C7D4F4]/30 animate-in fade-in slide-in-from-top-4 duration-300">
+              <div className="flex flex-col gap-3">
+                <input type="text" placeholder="이름" className="w-full p-4 rounded-[12px] border-0 text-sm bg-white shadow-sm outline-none focus:ring-2 focus:ring-blue-400" onChange={(e) => setInfo({...info, name: e.target.value})} />
+                <input type="text" placeholder="학번" className="w-full p-4 rounded-[12px] border-0 text-sm bg-white shadow-sm outline-none focus:ring-2 focus:ring-blue-400" onChange={(e) => setInfo({...info, studentId: e.target.value})} />
+                <button onClick={handleSearch} disabled={isSearching} className="w-full bg-[#1A1A1A] text-white font-bold py-4 rounded-[12px] text-sm shadow-lg active:scale-95 transition-all">조회하기</button>
+                <div className="mt-4 flex flex-col gap-3">
+                  {myReservations.map((res) => (
+                    <div key={res.id} className="bg-white p-5 rounded-[12px] shadow-sm flex justify-between items-center border border-blue-50">
+                      <div>
+                        <span className="text-[10px] font-bold text-blue-600 block mb-1">{res.piano_name}</span>
+                        <p className="text-sm font-bold">{isAdmin ? `👤 ${res.user_name} | ` : ""}{res.data}</p>
+                        <p className="text-[11px] text-[#999999]">{formatTime(res.start_time)} - {formatTime(res.end_time)}</p>
+                      </div>
+                      <button onClick={() => handleDelete(res.id)} className="text-red-500 text-xs font-bold px-3 py-2 hover:bg-red-50 rounded-lg transition-colors">취소</button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </section>
+
+        {/* 🏆 연습왕 랭킹 섹션 (디자인 재구성) */}
+        <section className="flex flex-col gap-4">
+          <h2 className="text-lg font-bold px-1">{currentMonth}월의 연습왕 TOP 3</h2>
+          <div className="bg-white rounded-[20px] p-8 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-white">
+            <div className="flex justify-around items-end h-40 gap-4">
+              {/* 2등 */}
+              {rankings[1] && (
+                <div className="flex-1 flex flex-col items-center">
+                  <div className="mb-2 text-center">
+                    <p className="text-[11px] font-bold text-gray-400">🥈 {rankings[1].name}</p>
+                    <p className="text-[10px] text-blue-500 font-bold">{rankings[1].total}h</p>
+                  </div>
+                  <div className="w-full bg-[#C7D4F4]/40 rounded-t-xl" style={{ height: '60%' }}></div>
+                </div>
+              )}
+              {/* 1등 */}
+              {rankings[0] && (
+                <div className="flex-1 flex flex-col items-center">
+                  <div className="mb-2 text-center">
+                    <p className="text-xs font-black text-[#1A1A1A]">🥇 {rankings[0].name}</p>
+                    <p className="text-[11px] text-blue-600 font-black">{rankings[0].total}h</p>
+                  </div>
+                  <div className="w-full bg-[#C7D4F4] rounded-t-xl shadow-[0_0_20px_rgba(199,212,244,0.5)]" style={{ height: '100%' }}></div>
+                </div>
+              )}
+              {/* 3등 */}
+              {rankings[2] && (
+                <div className="flex-1 flex flex-col items-center">
+                  <div className="mb-2 text-center">
+                    <p className="text-[11px] font-bold text-gray-400">🥉 {rankings[2].name}</p>
+                    <p className="text-[10px] text-orange-400 font-bold">{rankings[2].total}h</p>
+                  </div>
+                  <div className="w-full bg-[#C7D4F4]/20 rounded-t-xl" style={{ height: '35%' }}></div>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* 이용 주의사항 */}
+        <section className="bg-white rounded-[20px] p-8 border border-white shadow-sm">
+          <h2 className="text-lg font-bold mb-4 flex items-center gap-2">⚠️ 이용 주의사항</h2>
+          <ul className="flex flex-col gap-3 text-sm text-[#666666] font-medium leading-relaxed">
+            <li className="flex gap-2"><span className="text-blue-400">•</span> 음식물 반입 금지 및 뒷정리 필수</li>
+            <li className="flex gap-2"><span className="text-blue-400">•</span> 노쇼 시 향후 이용이 제한될 수 있음</li>
+            <li className="flex gap-2"><span className="text-blue-400">•</span> 비동아리원 정보 예약 시 강제 취소 가능</li>
+            <li className="flex flex-col mt-2 pt-4 border-t border-gray-50">
+              <span className="text-xs text-gray-400">문의: 크누피 집행부</span>
+              <a href="https://open.kakao.com/o/s5DRwRei" target="_blank" rel="noopener noreferrer" className="text-blue-600 font-bold underline underline-offset-4 mt-1">사이소리함 바로가기</a>
+            </li>
+          </ul>
+        </section>
+
+        {/* 푸터 (디자인 데이터 적용) */}
+        <footer className="py-10 text-center">
+          <p className="text-[12px] font-light tracking-[0.04em] text-[#999999]">
+            © KYUNGPOOK NATIONAL UNIV. PIANO CLUB KNUPI
+          </p>
+        </footer>
+      </div>
     </main>
   );
 }
