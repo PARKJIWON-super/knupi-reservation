@@ -116,57 +116,72 @@ export default function Home() {
           )}
         </section>
 
-        {/* 2️⃣ 피아노 배치도 섹션 (원하는 레이아웃으로 정밀 보정) */}
-<section className="flex flex-col gap-[5px]">
-  <h2 className="text-[24px] font-semibold tracking-[-0.03em] text-black px-1 py-[10px]">
-    피아노 배치도
-  </h2>
-  
-  {/* 메인 컨테이너: 피그마 규격 439.59 x 184.79 반영 */}
-  <div className="w-full max-w-[439.59px] aspect-[439.59/184.79] bg-white/17 backdrop-blur-md rounded-[15px] border border-white/20 relative overflow-hidden flex items-center justify-center self-center shadow-sm">
+        {/* 2️⃣ 피아노 배치도 섹션 (피그마 Vector 데이터 정밀 반영) */}
+<section className="flex flex-col gap-[5px] w-full items-center">
+  <div className="w-full max-w-[441.19px] px-[2px] py-[10px] flex items-center self-start">
+    <h2 className="text-[24px] font-semibold tracking-[-0.03em] text-black">피아노 배치도</h2>
+  </div>
+
+  {/* 메인 컨테이너 (피그마 Frame 3 규격 반영) */}
+  <div className="w-full max-w-[439.59px] aspect-[439.59/184.79] bg-white/17 backdrop-blur-md rounded-[15px] relative overflow-hidden border border-white/20 shadow-sm">
     
-    {/* 전체 배치도 Group 영역 */}
-    <div className="relative w-[320px] h-[150px]">
+    {/* Group 3: 내부 요소들의 기준점이 되는 영역 (307.1px x 164.79px) */}
+    <div className="absolute inset-0 m-auto w-[69.8%] h-[89.2%] relative">
       
-      {/* --- 왼쪽 빈 구역 (Rectangle) --- */}
-      <div className="absolute left-[0%] top-[10%] w-[22%] h-[85%] bg-[#C7D4F4]/15 rounded-[4px]"></div>
-
-      {/* --- 102호 구역 (가운데 직사각형) --- */}
-      <div className="absolute left-[30%] top-[10%] w-[22%] h-[85%] bg-[#C7D4F4]/25 rounded-[4px]">
-        {/* 3번 피아노 마커 */}
-        <div className="absolute left-[15%] top-[-8%] flex flex-col items-center gap-1">
-          <span className="text-[12px] font-semibold text-[#808080]">3</span>
-          <div className="w-[18px] h-[18px] bg-[#C7D4F4] rounded-[3px] shadow-sm"></div>
-        </div>
-        {/* 2번 피아노 마커 */}
-        <div className="absolute left-[65%] top-[-8%] flex flex-col items-center gap-1">
-          <span className="text-[12px] font-semibold text-[#808080]">2</span>
-          <div className="w-[18px] h-[18px] bg-[#C7D4F4] rounded-[3px] shadow-sm"></div>
-        </div>
-        {/* 1번 피아노 마커 (오른쪽 벽면) */}
-        <div className="absolute right-[-10%] bottom-[20%] flex items-center gap-2">
-          <div className="w-[16px] h-[22px] bg-[#C7D4F4] rounded-[3px] shadow-sm"></div>
-          <span className="text-[12px] font-semibold text-[#808080]">1</span>
-        </div>
-      </div>
-      <span className="absolute left-[34%] top-[100%] text-[14px] font-semibold text-[#333333]">102호</span>
-
-      {/* --- 103호 구역 (우측 각진 다각형) --- */}
-      {/* clip-path를 사용하여 상단이 깎인 육각형 형태 구현 */}
+      {/* --- 배경 구역 (Vector 데이터 기반) --- */}
+      
+      {/* 102호 베이스 구역 (Vector 17.52%) */}
       <div 
-        className="absolute left-[58%] top-[15%] w-[33%] h-[75%] bg-[#C7D4F4]/25"
-        style={{ clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 25% 100%, 0% 25%)' }}
-      >
-        {/* 업라이트 피아노 마커 (마름모꼴 회전 배치) */}
-        <div className="absolute right-[10%] bottom-[15%] flex flex-col items-center gap-1">
-          <div 
-            className="w-[22px] h-[22px] bg-[#C7D4F4] rounded-[4px] shadow-sm"
-            style={{ transform: 'rotate(45deg)' }}
-          ></div>
-          <span className="text-[12px] font-semibold text-[#808080] mt-1 ml-4 whitespace-nowrap">업라이트</span>
-        </div>
-      </div>
-      <span className="absolute left-[66%] top-[100%] text-[14px] font-semibold text-[#333333]">103호</span>
+        className="absolute left-[17.52%] top-[36.53%] w-[24.4%] h-[46%] bg-[#C7D4F4]/20 rounded-sm"
+        style={{ transform: 'rotate(-90deg)' }}
+      ></div>
+
+      {/* 103호 베이스 구역 (Vector 58%) */}
+      <div 
+        className="absolute left-[58%] top-[5.41%] w-[15.85%] h-[30.18%] bg-[#C7D4F4]/20"
+        style={{ transform: 'matrix(0.63, -0.78, 0.78, 0.62, 0, 0)' }}
+      ></div>
+
+      {/* 실내 구역 1 (Vector 39.21%) */}
+      <div 
+        className="absolute left-[39.21%] top-[37.32%] w-[19.19%] h-[32.66%] bg-[#C7D4F4]/45 rounded-sm"
+        style={{ transform: 'rotate(-90deg)' }}
+      ></div>
+
+      {/* 실내 구역 2 (Vector 56.44%) */}
+      <div 
+        className="absolute left-[56.44%] top-[37.32%] w-[19.18%] h-[46.09%] bg-[#C7D4F4]/45 rounded-sm"
+        style={{ transform: 'rotate(-90deg)' }}
+      ></div>
+
+      {/* --- 피아노 마커 및 실물 표현 (Vector 데이터) --- */}
+
+      {/* 3번 피아노 위치 (Vector 42.14%) */}
+      <div className="absolute left-[42.14%] top-[37.32%] w-[2.74%] h-[10.77%] bg-[#C7D4F4] rounded-sm" style={{ transform: 'rotate(-90deg)' }}></div>
+      <span className="absolute left-[43.51%] top-[25.58%] text-[14px] font-semibold text-[#808080] font-['Pretendard']">3</span>
+
+      {/* 2번 피아노 위치 (Vector 47.48%) */}
+      <div className="absolute left-[47.48%] top-[37.32%] w-[2.73%] h-[10.77%] bg-[#C7D4F4] rounded-sm" style={{ transform: 'rotate(-90deg)' }}></div>
+      <span className="absolute left-[48.82%] top-[25.58%] text-[14px] font-semibold text-[#808080] font-['Pretendard']">2</span>
+
+      {/* 1번 피아노 위치 (Vector 50.19%) */}
+      <div className="absolute left-[50.19%] top-[65.56%] w-[2.76%] h-[10.68%] bg-[#C7D4F4] rounded-sm"></div>
+      <span className="absolute left-[53.57%] top-[66.3%] text-[14px] font-semibold text-[#808080] font-['Pretendard']">1</span>
+
+      {/* 업라이트 피아노 위치 (Vector 70.33%) */}
+      <div 
+        className="absolute left-[70.33%] top-[69.5%] w-[5.2%] h-[6.39%] bg-[#C7D4F4] rounded-sm"
+        style={{ transform: 'matrix(0.65, -0.76, 0.76, 0.65, 0, 0)' }}
+      ></div>
+      <span className="absolute left-[74.82%] top-[76.65%] text-[14px] font-semibold text-[#808080] font-['Pretendard'] whitespace-nowrap">업라이트</span>
+
+      {/* --- 통로 및 벽면 라인 (Vector Box) --- */}
+      <div className="absolute left-[60.29%] top-[76.65%] w-[5.22%] h-[6.35%] border border-[#C7D4F4] rounded-sm"></div>
+      <div className="absolute left-[39.22%] top-[46.21%] w-[5.18%] h-[6.4%] border border-[#C7D4F4] rounded-sm" style={{ transform: 'rotate(90deg)' }}></div>
+
+      {/* --- 호수 텍스트 표시 --- */}
+      <span className="absolute left-[42.14%] top-[83.68%] text-[14px] font-semibold text-[#333333] font-['Pretendard']">102호</span>
+      <span className="absolute left-[60.29%] top-[83.68%] text-[14px] font-semibold text-[#333333] font-['Pretendard']">103호</span>
 
     </div>
   </div>
