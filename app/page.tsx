@@ -116,41 +116,61 @@ export default function Home() {
           )}
         </section>
 
-        {/* 2️⃣ 피아노 배치도 (Vector CSS 및 이미지 레이아웃 정밀 반영) */}
-        <section className="flex flex-col gap-[5px]">
-          <h2 className="text-[24px] font-semibold leading-[29px] tracking-[-0.03em] px-1 py-[10px]">피아노 배치도</h2>
-          <div className="w-full h-[184.79px] bg-white/17 backdrop-blur-md rounded-[15px] border border-white/20 relative overflow-hidden flex items-center justify-center p-[10px_77px]">
-            <div className="relative w-[307.1px] h-[164.79px]">
-              
-              {/* 왼쪽 회색 박스 (빈 방) */}
-              <div className="absolute left-[0%] top-[20%] w-[25%] h-[75%] bg-[#C7D4F4]/20 rounded-sm"></div>
+        {/* 2️⃣ 피아노 배치도 섹션 (원하는 레이아웃으로 정밀 보정) */}
+<section className="flex flex-col gap-[5px]">
+  <h2 className="text-[24px] font-semibold tracking-[-0.03em] text-black px-1 py-[10px]">
+    피아노 배치도
+  </h2>
+  
+  {/* 메인 컨테이너: 피그마 규격 439.59 x 184.79 반영 */}
+  <div className="w-full max-w-[439.59px] aspect-[439.59/184.79] bg-white/17 backdrop-blur-md rounded-[15px] border border-white/20 relative overflow-hidden flex items-center justify-center self-center shadow-sm">
+    
+    {/* 전체 배치도 Group 영역 */}
+    <div className="relative w-[320px] h-[150px]">
+      
+      {/* --- 왼쪽 빈 구역 (Rectangle) --- */}
+      <div className="absolute left-[0%] top-[10%] w-[22%] h-[85%] bg-[#C7D4F4]/15 rounded-[4px]"></div>
 
-              {/* 102호 구역 */}
-              <div className="absolute left-[33%] top-[20%] w-[25%] h-[75%] bg-[#C7D4F4]/30 rounded-sm"></div>
-              <span className="absolute left-[37%] top-[98%] text-[14px] font-semibold text-[#333333]">102호</span>
-              
-              {/* 피아노 위치 (Vector 데이터 기준) */}
-              <div className="absolute left-[38.5%] top-[20.5%] w-[6%] h-[10.5%] bg-[#C7D4F4] rounded-sm"></div> {/* 3번 */}
-              <div className="absolute left-[47%] top-[20.5%] w-[6%] h-[10.5%] bg-[#C7D4F4] rounded-sm"></div> {/* 2번 */}
-              <div className="absolute left-[52.5%] top-[65%] w-[5.5%] h-[11%] bg-[#C7D4F4] rounded-sm"></div> {/* 1번 */}
-              
-              <span className="absolute left-[40.5%] top-[10%] text-[14px] font-semibold text-[#808080]">3</span>
-              <span className="absolute left-[49%] top-[10%] text-[14px] font-semibold text-[#808080]">2</span>
-              <span className="absolute left-[59%] top-[66%] text-[14px] font-semibold text-[#808080]">1</span>
+      {/* --- 102호 구역 (가운데 직사각형) --- */}
+      <div className="absolute left-[30%] top-[10%] w-[22%] h-[85%] bg-[#C7D4F4]/25 rounded-[4px]">
+        {/* 3번 피아노 마커 */}
+        <div className="absolute left-[15%] top-[-8%] flex flex-col items-center gap-1">
+          <span className="text-[12px] font-semibold text-[#808080]">3</span>
+          <div className="w-[18px] h-[18px] bg-[#C7D4F4] rounded-[3px] shadow-sm"></div>
+        </div>
+        {/* 2번 피아노 마커 */}
+        <div className="absolute left-[65%] top-[-8%] flex flex-col items-center gap-1">
+          <span className="text-[12px] font-semibold text-[#808080]">2</span>
+          <div className="w-[18px] h-[18px] bg-[#C7D4F4] rounded-[3px] shadow-sm"></div>
+        </div>
+        {/* 1번 피아노 마커 (오른쪽 벽면) */}
+        <div className="absolute right-[-10%] bottom-[20%] flex items-center gap-2">
+          <div className="w-[16px] h-[22px] bg-[#C7D4F4] rounded-[3px] shadow-sm"></div>
+          <span className="text-[12px] font-semibold text-[#808080]">1</span>
+        </div>
+      </div>
+      <span className="absolute left-[34%] top-[100%] text-[14px] font-semibold text-[#333333]">102호</span>
 
-              {/* 103호 구역 (삼각형 형태의 Vector 반영) */}
-              <div className="absolute left-[62%] top-[25%] w-[33%] h-[68%] bg-[#C7D4F4]/30" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 100%, 75% 100%, 0 25%)' }}></div>
-              <span className="absolute left-[70%] top-[98%] text-[14px] font-semibold text-[#333333]">103호</span>
-              
-              {/* 업라이트 피아노 (회전값 적용) */}
-              <div 
-                className="absolute left-[83%] top-[70%] w-[8%] h-[13%] bg-[#C7D4F4] rounded-sm" 
-                style={{ transform: 'rotate(-45deg)' }}
-              ></div>
-              <span className="absolute left-[92%] top-[82%] text-[14px] font-semibold text-[#808080] whitespace-nowrap">업라이트</span>
-            </div>
-          </div>
-        </section>
+      {/* --- 103호 구역 (우측 각진 다각형) --- */}
+      {/* clip-path를 사용하여 상단이 깎인 육각형 형태 구현 */}
+      <div 
+        className="absolute left-[58%] top-[15%] w-[33%] h-[75%] bg-[#C7D4F4]/25"
+        style={{ clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 25% 100%, 0% 25%)' }}
+      >
+        {/* 업라이트 피아노 마커 (마름모꼴 회전 배치) */}
+        <div className="absolute right-[10%] bottom-[15%] flex flex-col items-center gap-1">
+          <div 
+            className="w-[22px] h-[22px] bg-[#C7D4F4] rounded-[4px] shadow-sm"
+            style={{ transform: 'rotate(45deg)' }}
+          ></div>
+          <span className="text-[12px] font-semibold text-[#808080] mt-1 ml-4 whitespace-nowrap">업라이트</span>
+        </div>
+      </div>
+      <span className="absolute left-[66%] top-[100%] text-[14px] font-semibold text-[#333333]">103호</span>
+
+    </div>
+  </div>
+</section>
 
         {/* 3️⃣ 이달의 랭킹 TOP 3 */}
         <section className="flex flex-col gap-[12px]">
