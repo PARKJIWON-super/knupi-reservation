@@ -120,64 +120,14 @@
 <section className="flex flex-col gap-[12px] w-full">
   <h2 className="text-[24px] font-semibold tracking-[-0.03em] text-black px-1">피아노 배치도</h2>
   
-  <div className="w-full bg-white/50 backdrop-blur-md rounded-[25px] p-6 border border-white/20 shadow-sm overflow-hidden">
-    {/* 이미지 비율에 맞춘 컨테이너 (너비 대비 높이 약 45%) */}
-    <div className="relative w-full aspect-[2/0.9] max-w-[500px] mx-auto overflow-hidden">
-      
-      {/* 왼쪽 빈 사각형 구역 */}
-      <div className="absolute left-[10%] top-[35%] w-[25%] h-[55%] bg-[#C7D4F4]/20 rounded-sm"></div>
-
-      {/* 102호 구역 */}
-      <div className="absolute left-[38.5%] top-[35%] w-[18%] h-[45%] bg-[#C7D4F4]/20 rounded-sm">
-        {/* 피아노 3 (좌측 상단) */}
-        <div className="absolute left-[20%] top-[-2%] w-[35%] h-[15%] bg-[#C7D4F4] rounded-sm"></div>
-        <span className="absolute left-[32%] top-[-35%] text-[14px] font-semibold text-[#808080]">3</span>
-
-        {/* 피아노 2 (우측 상단) */}
-        <div className="absolute right-[5%] top-[-2%] w-[35%] h-[15%] bg-[#C7D4F4] rounded-sm"></div>
-        <span className="absolute right-[15%] top-[-35%] text-[14px] font-semibold text-[#808080]">2</span>
-
-        {/* 왼쪽 벽면 가이드 피아노 */}
-        <div className="absolute left-[2%] top-[25%] w-[15%] h-[30%] border border-[#C7D4F4] rounded-sm"></div>
-
-        {/* 피아노 1 (우측 하단) */}
-        <div className="absolute right-[0%] bottom-[15%] w-[20%] h-[30%] bg-[#C7D4F4] rounded-sm"></div>
-        <span className="absolute right-[-25%] bottom-[22%] text-[14px] font-semibold text-[#808080]">1</span>
-        
-        <span className="absolute -bottom-[25%] left-1/2 -translate-x-1/2 text-[16px] font-bold text-[#333333] whitespace-nowrap">102호</span>
-      </div>
-
-      {/* 103호 구역 (이미지 특유의 대각선 구조 구현) */}
-      <div className="absolute left-[61%] top-[35%] w-[30%] h-[45%]">
-        {/* 하단 삼각형/사각형 방 부분 */}
-        <div className="absolute left-0 bottom-0 w-[60%] h-[100%] bg-[#C7D4F4]/20 clip-path-polygon">
-          <div className="absolute left-[25%] bottom-[5%] w-[50%] h-[20%] border border-[#C7D4F4] rounded-sm"></div>
-        </div>
-
-        {/* 상단 대각선 방 부분 */}
-        <div 
-          className="absolute right-[-5%] top-[-15%] w-[85%] h-[105%] bg-[#C7D4F4]/10 rounded-sm" 
-          style={{ transform: 'rotate(-40deg)', transformOrigin: 'bottom left' }}
-        ></div>
-
-        {/* 업라이트 피아노 (입구 대각선) */}
-        <div 
-          className="absolute right-[20%] bottom-[5%] w-[25%] h-[15%] bg-[#C7D4F4] rounded-sm"
-          style={{ transform: 'rotate(-45deg)' }}
-        ></div>
-        <span className="absolute right-[-15%] bottom-[-5%] text-[14px] font-semibold text-[#808080] whitespace-nowrap">업라이트</span>
-
-        <span className="absolute -bottom-[25%] left-[25%] -translate-x-1/2 text-[16px] font-bold text-[#333333] whitespace-nowrap">103호</span>
-      </div>
-
-    </div>
+  <div className="w-full bg-white/50 backdrop-blur-md rounded-[25px] p-2 border border-white/20 shadow-sm overflow-hidden flex justify-center items-center">
+    {/* 이미지 파일 직접 삽입 */}
+    <img 
+      src="/piano-layout.png" 
+      alt="피아노 배치도" 
+      className="w-full h-auto max-w-[480px] rounded-[20px]"
+    />
   </div>
-
-  <style jsx>{`
-    .clip-path-polygon {
-      clip-path: polygon(0 0, 100% 100%, 0 100%);
-    }
-  `}</style>
 </section>
 
           {/* 3️⃣ 이달의 랭킹 TOP 3 */}
