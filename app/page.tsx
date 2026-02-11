@@ -7,14 +7,14 @@ import { supabase } from '@/lib/supabase';
 export default function Home() {
   const [showLookup, setShowLookup] = useState(false);
   const [info, setInfo] = useState({ name: '', studentId: '' });
-  const [myReservations, setMyReservations] = useState([]);
+  const [myReservations, setMyReservations] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [rankings, setRankings] = useState([]);
+  const [rankings, setRankings] = useState<{name: string, total: number}[]>([]);
   
   const currentMonth = new Date().getMonth() + 1;
 
-  const formatTime = (time) => {
+  const formatTime = (time: number) => {
     const hours = Math.floor(time);
     const minutes = (time % 1) === 0.5 ? '30' : '00';
     return `${hours}:${minutes}`;
@@ -30,9 +30,10 @@ export default function Home() {
       .gte('data', firstDayOfMonth);
 
     if (data) {
-      const aggregate = data.reduce((acc, cur) => {
+      const aggregate = data.reduce((acc: any, cur) => {
         const userKey = `${cur.user_name}_${cur.student_id}`;
         const duration = cur.end_time - cur.start_time;
+        
         if (!acc[userKey]) {
           acc[userKey] = { name: cur.user_name, total: 0 };
         }
@@ -41,7 +42,7 @@ export default function Home() {
       }, {});
 
       const sorted = Object.values(aggregate)
-        .map((item) => ({ 
+        .map((item: any) => ({ 
           name: item.name, 
           total: item.total 
         }))
@@ -68,11 +69,14 @@ export default function Home() {
       query = query.eq('user_name', info.name).eq('student_id', info.studentId).gte('data', today).order('data', { ascending: true }); 
     }
     const { data, error } = await query;
-    if (!error) { setMyReservations(data || []); if (data?.length === 0) alert("오늘 이후의 예약 내역이 없습니다."); }
+    if (!error) { 
+      setMyReservations(data || []); 
+      if (data?.length === 0) alert("오늘 이후의 예약 내역이 없습니다."); 
+    }
     setIsSearching(false);
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: string) => {
     if (!confirm("정말로 이 예약을 취소하시겠습니까?")) return;
     const { error } = await supabase.from('reservations').delete().eq('id', id);
     if (!error) { 
@@ -83,8 +87,74 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-[#F9FAFB] font-['Pretendard'] text-[#1A1A1A] flex flex-col items-center overflow-x-hidden">
+    <main className="min-h-screen bg-[#F9FAFB] font-['Pretendard'] text-[#1A1A1A] flex flex-col items-center overflow-x-hidden relative">
       
+      {/* 🚀 모달 레이어: showLookup이 true일 때만 표시 */}
+      {showLookup && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center px-[20px]">
+          {/* 뒷배경 어둡게 처리 및 클릭 시 닫기 */}
+          <div 
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm" 
+            onClick={() => { setShowLookup(false); setMyReservations([]); }}
+          />
+          
+          {/* 모달 박스 */}
+          <div className="relative w-full max-w-[400px] bg-white rounded-[32px] p-8 shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-6" />
+            
+            <h3 className="text-[20px] font-bold text-center mb-8 tracking-[-0.03em]">조회 정보를 입력하세요</h3>
+            
+            <div className="flex flex-col gap-3">
+              <input 
+                type="text" 
+                placeholder="이름" 
+                className="w-full p-4 rounded-[16px] bg-[#F3F4F6] border-0 text-[15px] outline-none focus:ring-2 ring-blue-100 transition-all" 
+                onChange={(e) => setInfo({...info, name: e.target.value})} 
+              />
+              <input 
+                type="text" 
+                placeholder="학번" 
+                className="w-full p-4 rounded-[16px] bg-[#F3F4F6] border-0 text-[15px] outline-none focus:ring-2 ring-blue-100 transition-all" 
+                onChange={(e) => setInfo({...info, studentId: e.target.value})} 
+              />
+              <button 
+                onClick={handleSearch} 
+                disabled={isSearching} 
+                className="w-full bg-[#C7D4F4] text-[#4A5568] font-bold py-4 rounded-[16px] text-[16px] mt-2 active:scale-95 transition-all shadow-sm"
+              >
+                {isSearching ? '조회 중...' : '조회하기'}
+              </button>
+            </div>
+
+            {/* 예약 결과 리스트 */}
+            {myReservations.length > 0 && (
+              <div className="mt-6 max-h-[250px] overflow-y-auto flex flex-col gap-3 pr-1 custom-scrollbar">
+                {myReservations.map((res) => (
+                  <div key={res.id} className="bg-white p-4 rounded-[16px] shadow-sm flex justify-between items-center border border-gray-100">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[11px] font-bold text-blue-600">{res.piano_name}</span>
+                        {isAdmin && <span className="text-[10px] bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded-md">예약자: {res.user_name}</span>}
+                      </div>
+                      <p className="text-[14px] font-bold">{res.data}</p>
+                      <p className="text-[12px] text-gray-400">{formatTime(res.start_time)} - {formatTime(res.end_time)}</p>
+                    </div>
+                    <button onClick={() => handleDelete(res.id)} className="text-red-500 text-[13px] font-bold px-3 py-2 hover:bg-red-50 rounded-xl transition-colors">취소</button>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            <button 
+              onClick={() => { setShowLookup(false); setMyReservations([]); }}
+              className="mt-6 w-full text-gray-400 text-[14px] font-medium hover:text-gray-600 transition-colors"
+            >
+              닫기
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* 상단 헤더 */}
       <div 
         className="w-full max-w-[480px] pt-[75px] pb-[340px] px-[24px] rounded-b-[15px] relative"
@@ -98,6 +168,7 @@ export default function Home() {
         </div>
       </div>
 
+      {/* 컨텐츠 영역 */}
       <div className="w-full max-w-[480px] -mt-[300px] px-[20px] flex flex-col gap-[65px] pb-[80px] relative z-10 font-['Pretendard']">
         
         {/* 1️⃣ 예약 서비스 */}
@@ -117,9 +188,7 @@ export default function Home() {
                 </div>
               </div>
             </Link>
-            
-            {/* 내 예약 확인하기 버튼 */}
-            <div onClick={() => { setShowLookup(true); setMyReservations([]); }} className="flex justify-between items-center w-full h-[105px] px-[30px] bg-white/30 backdrop-blur-[20px] rounded-[20px] border border-white/20 hover:bg-white/40 shadow-sm cursor-pointer transition-all group">
+            <div onClick={() => setShowLookup(true)} className="flex justify-between items-center w-full h-[105px] px-[30px] bg-white/30 backdrop-blur-[20px] rounded-[20px] border border-white/20 hover:bg-white/40 shadow-sm cursor-pointer transition-all group">
               <div className="flex flex-col gap-[8px]">
                 <span className="text-[20px] font-semibold leading-[24px] tracking-[-0.03em]">내 예약 확인하기</span>
                 <span className="text-[16px] text-[#B2B2B2] leading-[19px] tracking-[-0.03em]">이름과 학번으로 조회</span>
@@ -192,72 +261,6 @@ export default function Home() {
           </p>
         </footer>
       </div>
-
-      {/* ✅ 조회용 바텀 시트 (모달) - image_637fc0.png 디자인 적용 */}
-      {showLookup && (
-        <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-300" onClick={() => setShowLookup(false)}>
-          <div 
-            className="w-full max-w-[480px] bg-[#F9FAFB] rounded-t-[40px] px-6 pt-10 pb-10 flex flex-col items-center animate-in slide-in-from-bottom-full duration-500 shadow-2xl overflow-y-auto max-h-[90vh]"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* 상단 바 */}
-            <div className="w-12 h-1.5 bg-gray-200 rounded-full mb-8"></div>
-            
-            <h2 className="text-[20px] font-bold mb-6">조회 정보를 입력하세요</h2>
-
-            {/* 입력창 섹션 */}
-            <div className="w-full flex flex-col gap-3 mb-6">
-              <input 
-                type="text" 
-                placeholder="이름" 
-                className="w-full p-4 rounded-full bg-white border border-gray-100 shadow-sm outline-none focus:border-[#C7D4F4] transition-all"
-                onChange={(e) => setInfo({...info, name: e.target.value})} 
-              />
-              <input 
-                type="text" 
-                placeholder="학번" 
-                className="w-full p-4 rounded-full bg-white border border-gray-100 shadow-sm outline-none focus:border-[#C7D4F4] transition-all"
-                onChange={(e) => setInfo({...info, studentId: e.target.value})} 
-              />
-              <button 
-                onClick={handleSearch} 
-                disabled={isSearching} 
-                className="w-full bg-[#C7D4F4] text-gray-800 font-bold py-4 rounded-full shadow-md active:scale-95 transition-all mt-2"
-              >
-                조회하기
-              </button>
-            </div>
-
-            {/* 조회된 예약 리스트 */}
-            <div className="w-full flex flex-col gap-4">
-              {myReservations.map((res) => (
-                <div key={res.id} className="bg-white p-5 rounded-[20px] shadow-sm flex justify-between items-center border border-gray-50 animate-in fade-in slide-in-from-top-2">
-                  <div className="flex flex-col gap-1">
-                    <span className="text-[13px] font-bold text-[#6C86D3]">{res.piano_name}</span>
-                    <p className="text-[16px] font-bold">{res.data} 예약</p>
-                    <p className="text-[14px] text-gray-400 font-medium">
-                      {formatTime(res.start_time)} - {formatTime(res.end_time)}
-                    </p>
-                  </div>
-                  <button 
-                    onClick={() => handleDelete(res.id)} 
-                    className="text-red-500 text-[14px] font-bold px-4 py-2 hover:bg-red-50 rounded-xl transition-colors"
-                  >
-                    취소하기
-                  </button>
-                </div>
-              ))}
-            </div>
-            
-            <button 
-              onClick={() => setShowLookup(false)}
-              className="mt-8 text-gray-400 text-sm font-medium underline underline-offset-4"
-            >
-              닫기
-            </button>
-          </div>
-        </div>
-      )}
     </main>
   );
 }
