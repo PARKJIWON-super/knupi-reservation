@@ -6,9 +6,7 @@ import { supabase } from '@/lib/supabase';
 
 export default function ReservationPage() {
   const pianos = ["1번 피아노", "2번 피아노", "3번 피아노", "업라이트 피아노"];
-  // 시작 시간용 (09:00 ~ 23:30)
   const timeSlots = Array.from({ length: 30 }, (_, i) => 9 + i * 0.5);
-  // 종료 시간용 (09:30 ~ 24:00)
   const endSlots = Array.from({ length: 31 }, (_, i) => 9 + i * 0.5).filter(t => t > 9);
 
   const [dbReservations, setDbReservations] = useState<any[]>([]);
@@ -48,13 +46,22 @@ export default function ReservationPage() {
   };
 
   const handleReserve = async (pianoName: string) => {
+    // 1. 필수 입력값 확인
     if (!formData.name || !formData.studentId || formData.start === null || formData.end === null) {
       return alert("모든 정보를 입력하고 시간을 선택해주세요.");
     }
+    
+    // 2. 학번 11자리 유효성 검사 추가
+    if (formData.studentId.length !== 11) {
+      return alert("학번은 반드시 11자리로 입력해주세요.");
+    }
+
+    // 3. 시간 순서 확인
     if (formData.start >= formData.end) {
       return alert("종료 시간은 시작 시간보다 늦어야 합니다.");
     }
 
+    // 4. 중복 예약 체크
     const isOverlap = dbReservations.some(res => {
       return (
         res.piano_name === pianoName &&
@@ -173,27 +180,27 @@ export default function ReservationPage() {
                 {isOpen && (
                   <div className="px-6 pb-8 pt-4 bg-[#F3F6FC] flex flex-col gap-4 animate-in fade-in duration-300">
                     <div className="grid grid-cols-2 gap-3">
-                      <input type="text" placeholder="이름" value={formData.name} className="w-full p-4 rounded-full bg-white text-[14px] outline-none shadow-sm border border-transparent focus:border-[#C7D4F4]" onChange={(e) => setFormData({...formData, name: e.target.value})} />
-                      <input type="text" placeholder="학번" value={formData.studentId} className="w-full p-4 rounded-full bg-white text-[14px] outline-none shadow-sm border border-transparent focus:border-[#C7D4F4]" onChange={(e) => setFormData({...formData, studentId: e.target.value})} />
+                      <input type="text" placeholder="이름" value={formData.name} className="w-full p-4 rounded-full bg-white text-[14px] outline-none shadow-sm border border-transparent focus:border-[#C7D4F4] placeholder:text-gray-400" onChange={(e) => setFormData({...formData, name: e.target.value})} />
+                      <input type="text" placeholder="학번" maxLength={11} value={formData.studentId} className="w-full p-4 rounded-full bg-white text-[14px] outline-none shadow-sm border border-transparent focus:border-[#C7D4F4] placeholder:text-gray-400" onChange={(e) => setFormData({...formData, studentId: e.target.value})} />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <select 
-                        className="w-full p-4 rounded-full bg-white text-[14px] outline-none appearance-none px-5 shadow-sm border border-transparent focus:border-[#C7D4F4]" 
+                        className={`w-full p-4 rounded-full bg-white text-[14px] outline-none appearance-none px-5 shadow-sm border border-transparent focus:border-[#C7D4F4] ${formData.start === null ? 'text-gray-400' : 'text-black'}`} 
                         value={formData.start ?? ""} 
                         onChange={(e) => setFormData({...formData, start: e.target.value === "" ? null : Number(e.target.value)})}
                       >
                         <option value="" disabled hidden>시작 시간</option>
-                        {timeSlots.map(t => <option key={t} value={t}>{formatTimeDisplay(t)}</option>)}
+                        {timeSlots.map(t => <option className="text-black" key={t} value={t}>{formatTimeDisplay(t)}</option>)}
                       </select>
 
                       <select 
-                        className="w-full p-4 rounded-full bg-white text-[14px] outline-none appearance-none px-5 shadow-sm border border-transparent focus:border-[#C7D4F4]" 
+                        className={`w-full p-4 rounded-full bg-white text-[14px] outline-none appearance-none px-5 shadow-sm border border-transparent focus:border-[#C7D4F4] ${formData.end === null ? 'text-gray-400' : 'text-black'}`} 
                         value={formData.end ?? ""} 
                         onChange={(e) => setFormData({...formData, end: e.target.value === "" ? null : Number(e.target.value)})}
                       >
                         <option value="" disabled hidden>종료 시간</option>
                         {endSlots.map(t => (
-                          <option key={t} value={t}>{formatTimeDisplay(t)}</option>
+                          <option className="text-black" key={t} value={t}>{formatTimeDisplay(t)}</option>
                         ))}
                       </select>
                     </div>
