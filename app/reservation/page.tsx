@@ -12,6 +12,9 @@ export default function ReservationPage() {
   const [dbReservations, setDbReservations] = useState<any[]>([]);
   const [activePiano, setActivePiano] = useState<string | null>(null);
   const [showMap, setShowMap] = useState(false);
+  
+  // ✅ 누가 예약했는지 보여주기 위한 상태 추가
+  const [tooltip, setTooltip] = useState<{ piano: string; time: number; name: string } | null>(null);
 
   const dates = Array.from({ length: 14 }, (_, i) => {
     const d = new Date();
@@ -49,12 +52,9 @@ export default function ReservationPage() {
     if (!formData.name || !formData.studentId || formData.start === null || formData.end === null) {
       return alert("모든 정보를 입력하고 시간을 선택해주세요.");
     }
-    
-    // ✅ 학번 10자리 유효성 검사로 수정
     if (formData.studentId.length !== 10) {
       return alert("학번은 반드시 10자리로 입력해주세요.");
     }
-
     if (formData.start >= formData.end) {
       return alert("종료 시간은 시작 시간보다 늦어야 합니다.");
     }
@@ -114,7 +114,7 @@ export default function ReservationPage() {
 
         <div className="flex gap-7 overflow-x-auto pb-6 scrollbar-hide px-1">
           {dates.map((d) => (
-            <button key={d.fullDate} onClick={() => setSelectedDate(d.fullDate)}
+            <button key={d.fullDate} onClick={() => { setSelectedDate(d.fullDate); setTooltip(null); }}
               className={`flex flex-col items-center min-w-[35px] transition-all ${selectedDate === d.fullDate ? 'bg-white/45 p-[10px_6px] rounded-[8px] -mt-[10px] shadow-sm' : ''}`}>
               <span className={`text-[20px] font-bold ${selectedDate === d.fullDate ? 'text-black' : 'text-[#808080]'}`}>{d.dayNum}</span>
               <span className={`text-[14px] font-semibold ${selectedDate === d.fullDate ? 'text-[#666666]' : 'text-[#B2B2B2]'}`}>{d.dayName}</span>
@@ -150,6 +150,7 @@ export default function ReservationPage() {
                       onClick={() => {
                         setActivePiano(isOpen ? null : piano);
                         setFormData({ ...formData, start: null, end: null });
+                        setTooltip(null);
                       }}
                       className="px-6 py-1.5 rounded-full text-[14px] font-bold bg-[#C7D4F4] text-black shadow-sm transition-transform active:scale-95"
                     >
@@ -163,11 +164,33 @@ export default function ReservationPage() {
                         <span key={h} className="text-[10px] text-gray-400 font-medium w-0 flex justify-center">{h}</span>
                       ))}
                     </div>
+                    
+                    {/* 타임라인 바 컨테이너 */}
                     <div className="relative h-2.5 bg-gray-100 rounded-full flex gap-[1px]">
                       {timeSlots.map(t => {
                         const res = dbReservations.find(r => r.piano_name === piano && String(r.data) === selectedDate && t >= r.start_time && t < r.end_time);
                         return (
-                          <div key={t} className={`flex-1 h-full first:rounded-l-full last:rounded-r-full ${res ? 'bg-[#C7D4F4]' : 'bg-transparent'}`} />
+                          <div 
+                            key={t} 
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                if (res) {
+                                    setTooltip(tooltip?.time === t && tooltip?.piano === piano ? null : { piano, time: t, name: res.user_name });
+                                } else {
+                                    setTooltip(null);
+                                }
+                            }}
+                            className={`flex-1 h-full first:rounded-l-full last:rounded-r-full transition-all relative ${res ? 'bg-[#C7D4F4] cursor-help' : 'bg-transparent'}`} 
+                          >
+                            {/* ✅ 클릭 시 나타나는 이름 툴팁 */}
+                            {tooltip?.piano === piano && tooltip?.time === t && (
+                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-black text-white text-[10px] rounded whitespace-nowrap z-50 animate-in fade-in slide-in-from-bottom-1">
+                                    {tooltip.name} 님
+                                    {/* 툴팁 화살표 */}
+                                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-black"></div>
+                                </div>
+                            )}
+                          </div>
                         );
                       })}
                     </div>
@@ -178,7 +201,6 @@ export default function ReservationPage() {
                   <div className="px-6 pb-8 pt-4 bg-[#F3F6FC] flex flex-col gap-4 animate-in fade-in duration-300">
                     <div className="grid grid-cols-2 gap-3">
                       <input type="text" placeholder="이름" value={formData.name} className="w-full p-4 rounded-full bg-white text-[14px] outline-none shadow-sm border border-transparent focus:border-[#C7D4F4] placeholder:text-gray-400" onChange={(e) => setFormData({...formData, name: e.target.value})} />
-                      {/* ✅ maxLength 10으로 수정 */}
                       <input type="text" placeholder="학번" maxLength={10} value={formData.studentId} className="w-full p-4 rounded-full bg-white text-[14px] outline-none shadow-sm border border-transparent focus:border-[#C7D4F4] placeholder:text-gray-400" onChange={(e) => setFormData({...formData, studentId: e.target.value})} />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
