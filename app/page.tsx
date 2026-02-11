@@ -10,9 +10,37 @@ export default function Home() {
   const [myReservations, setMyReservations] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [rankings, setRankings] = useState<{name: string, total: number}[]>([]);
-  
+  const [rankings, setRankings] = useState<{ name: string, total: number }[]>([]);
+
   const currentMonth = new Date().getMonth() + 1;
+
+  // 피그마 디자인을 반영한 공통 화살표 아이콘 컴포넌트
+  const ArrowIcon = () => (
+    <div className="relative w-[24px] h-[24px] flex-none order-1 grow-0 shrink-0">
+      {/* Bounding box */}
+      <div className="absolute inset-0 bg-[#D9D9D9] rounded-full group-hover:bg-black transition-colors duration-200"></div>
+      {/* arrow_forward_ios (SVG로 형상화) */}
+      <svg 
+        className="absolute w-[6px] h-[10px]" 
+        style={{ 
+          left: '28.18%', 
+          top: '50%', 
+          transform: 'translateY(-50%)',
+          height: '18.99px' // 피그마 지정 높이 반영
+        }} 
+        viewBox="0 0 10 18" 
+        fill="none"
+      >
+        <path 
+          d="M2 2L8 9L2 16" 
+          stroke="white" // 배경이 검정으로 변할 때 가독성을 위해 흰색 적용
+          strokeWidth="2.5" 
+          strokeLinecap="round" 
+          strokeLinejoin="round"
+        />
+      </svg>
+    </div>
+  );
 
   const formatTime = (time: number) => {
     const hours = Math.floor(time);
@@ -23,19 +51,15 @@ export default function Home() {
   const fetchRankings = async () => {
     const now = new Date();
     const firstDayOfMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
-    
-    // ✅ 1. student_id를 조회 조건에 포함시킵니다.
     const { data } = await supabase
       .from('reservations')
       .select('user_name, student_id, start_time, end_time')
       .gte('data', firstDayOfMonth);
 
     if (data) {
-      // ✅ 2. 이름과 학번을 조합하여 고유 키를 생성합니다.
       const aggregate = data.reduce((acc: any, cur) => {
-        const userKey = `${cur.user_name}_${cur.student_id}`; // 고유 키 생성
+        const userKey = `${cur.user_name}_${cur.student_id}`;
         const duration = cur.end_time - cur.start_time;
-        
         if (!acc[userKey]) {
           acc[userKey] = { name: cur.user_name, total: 0 };
         }
@@ -43,15 +67,10 @@ export default function Home() {
         return acc;
       }, {});
 
-      // ✅ 3. 객체를 배열로 변환하고 정렬합니다.
       const sorted = Object.values(aggregate)
-        .map((item: any) => ({ 
-          name: item.name, 
-          total: item.total 
-        }))
+        .map((item: any) => ({ name: item.name, total: item.total }))
         .sort((a, b) => b.total - a.total)
         .slice(0, 3);
-
       setRankings(sorted);
     }
   };
@@ -64,12 +83,12 @@ export default function Home() {
     const now = new Date();
     const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     let query = supabase.from('reservations').select('*');
-    if (info.name === '운영자' && info.studentId === '12345') { 
-      setIsAdmin(true); 
-      query = query.order('data', { ascending: true }); 
-    } else { 
-      setIsAdmin(false); 
-      query = query.eq('user_name', info.name).eq('student_id', info.studentId).gte('data', today).order('data', { ascending: true }); 
+    if (info.name === '운영자' && info.studentId === '12345') {
+      setIsAdmin(true);
+      query = query.order('data', { ascending: true });
+    } else {
+      setIsAdmin(false);
+      query = query.eq('user_name', info.name).eq('student_id', info.studentId).gte('data', today).order('data', { ascending: true });
     }
     const { data, error } = await query;
     if (!error) { setMyReservations(data || []); if (data?.length === 0) alert("오늘 이후의 예약 내역이 없습니다."); }
@@ -79,10 +98,10 @@ export default function Home() {
   const handleDelete = async (id: string) => {
     if (!confirm("정말로 이 예약을 취소하시겠습니까?")) return;
     const { error } = await supabase.from('reservations').delete().eq('id', id);
-    if (!error) { 
-      setMyReservations((prev) => prev.filter((res) => res.id !== id)); 
-      alert("✅ 예약이 취소되었습니다."); 
-      fetchRankings(); 
+    if (!error) {
+      setMyReservations((prev) => prev.filter((res) => res.id !== id));
+      alert("✅ 예약이 취소되었습니다.");
+      fetchRankings();
     }
   };
 
@@ -104,27 +123,29 @@ export default function Home() {
         <section className="flex flex-col gap-[12px]">
           <h2 className="text-[24px] font-semibold leading-[29px] tracking-[-0.03em] text-black">예약 서비스</h2>
           <div className="flex flex-col gap-[10px]">
+            {/* 연습실 예약하기 */}
             <Link href="/reservation">
               <div className="flex justify-between items-center w-full h-[105px] px-[30px] bg-white/30 backdrop-blur-[20px] rounded-[20px] border border-white/20 hover:bg-white/40 shadow-sm transition-all cursor-pointer group">
                 <div className="flex flex-col gap-[8px]">
                   <span className="text-[20px] font-semibold leading-[24px] tracking-[-0.03em]">연습실 예약하기</span>
                   <span className="text-[16px] text-[#B2B2B2] leading-[19px] tracking-[-0.03em]">실시간 현황 확인 및 예약</span>
                 </div>
-                <div className="w-[24px] h-[24px] flex items-center justify-center bg-[#D9D9D9] rounded-full group-hover:bg-black transition-colors">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M9 5L15 12L9 19" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                </div>
+                {/* ✅ 수정된 아이콘 */}
+                <ArrowIcon />
               </div>
             </Link>
+
+            {/* 내 예약 확인하기 */}
             <div onClick={() => setShowLookup(!showLookup)} className="flex justify-between items-center w-full h-[105px] px-[30px] bg-white/30 backdrop-blur-[20px] rounded-[20px] border border-white/20 hover:bg-white/40 shadow-sm cursor-pointer transition-all group">
               <div className="flex flex-col gap-[8px]">
                 <span className="text-[20px] font-semibold leading-[24px] tracking-[-0.03em]">내 예약 확인하기</span>
                 <span className="text-[16px] text-[#B2B2B2] leading-[19px] tracking-[-0.03em]">이름과 학번으로 조회</span>
               </div>
-              <div className="w-[24px] h-[24px] flex items-center justify-center bg-[#D9D9D9] rounded-full group-hover:bg-black transition-colors">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M9 5L15 12L9 19" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-              </div>
+              {/* ✅ 수정된 아이콘 */}
+              <ArrowIcon />
             </div>
           </div>
+          
           {showLookup && (
             <div className="mt-2 p-6 bg-white/60 backdrop-blur-xl rounded-[20px] border border-white/40 shadow-xl animate-in fade-in slide-in-from-top-4 duration-500">
               <div className="flex flex-col gap-3">
@@ -207,7 +228,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 푸터 */}
         <footer className="text-center pt-[10px] pb-[30px]">
           <p className="text-[12px] font-light tracking-[0.04em] text-[#999999]">
             © KYUNGPOOK NATIONAL UNIV. PIANO CLUB KNUPI
