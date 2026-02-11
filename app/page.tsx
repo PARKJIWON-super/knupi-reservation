@@ -86,20 +86,24 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-[#F9FAFB] font-['Pretendard'] text-[#1A1A1A] flex flex-col items-center overflow-x-hidden">
       
-      {/* 상단 헤더 */}
+      {/* 상단 헤더 - 사진 스타일 반영 */}
       <div 
-        className="w-full max-w-[480px] pt-[63.62px] pb-[120px] px-[24px] rounded-b-[15px] relative shadow-sm"
+        className="w-full max-w-[480px] pt-[75px] pb-[120px] px-[24px] rounded-b-[15px] relative"
         style={{ background: 'radial-gradient(137.53% 99.23% at 92.41% 7.26%, #FFF5E4 0%, #C7D4F4 100%)' }}
       >
-        <h1 className="text-[32px] font-bold leading-[38px] tracking-[-0.03em] mb-1">Knupi Reservation</h1>
-        <p className="text-[16px] font-normal leading-[19px] tracking-[-0.03em] text-[#383838]">크누피 연습실 예약</p>
+        <div className="flex flex-col gap-1">
+          <h1 className="text-[34px] font-bold tracking-[-0.04em] leading-tight">
+            <span className="text-[#000080]">Knupi</span> <span className="text-[#5D4037]">Reservation</span>
+          </h1>
+          <p className="text-[15px] font-medium tracking-[-0.03em] text-[#7B8AB0]">크누피 연습실 예약</p>
+        </div>
       </div>
 
       <div className="w-full max-w-[480px] -mt-[80px] px-[20px] flex flex-col gap-[65px] pb-[80px] relative z-10 font-['Pretendard']">
         
         {/* 1️⃣ 예약 서비스 */}
         <section className="flex flex-col gap-[12px]">
-          <h2 className="text-[24px] font-semibold leading-[29px] tracking-[-0.03em] text-black">예약 서비스</h2>
+          <h2 className="text-[22px] font-bold tracking-[-0.03em] text-[#1A1A1A] px-1">예약 서비스</h2>
           <div className="flex flex-col gap-[10px]">
             <Link href="/reservation">
               <div className="flex justify-between items-center w-full h-[105px] px-[30px] bg-white/30 backdrop-blur-[20px] rounded-[20px] border border-white/20 hover:bg-white/40 shadow-sm transition-all cursor-pointer group">
@@ -107,7 +111,6 @@ export default function Home() {
                   <span className="text-[20px] font-semibold leading-[24px] tracking-[-0.03em]">연습실 예약하기</span>
                   <span className="text-[16px] text-[#B2B2B2] leading-[19px] tracking-[-0.03em]">실시간 현황 확인 및 예약</span>
                 </div>
-                {/* 사진 스타일로 변경된 화살표 */}
                 <div className="w-[32px] h-[32px] flex items-center justify-center transition-transform group-hover:translate-x-1">
                   <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
                     <path d="M9 5L16 12L9 19" stroke="#1A1A1A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
@@ -120,7 +123,6 @@ export default function Home() {
                 <span className="text-[20px] font-semibold leading-[24px] tracking-[-0.03em]">내 예약 확인하기</span>
                 <span className="text-[16px] text-[#B2B2B2] leading-[19px] tracking-[-0.03em]">이름과 학번으로 조회</span>
               </div>
-              {/* 사진 스타일로 변경된 화살표 */}
               <div className="w-[32px] h-[32px] flex items-center justify-center transition-transform group-hover:translate-x-1">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
                   <path d="M9 5L16 12L9 19" stroke="#1A1A1A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
@@ -160,7 +162,7 @@ export default function Home() {
 
         {/* 2️⃣ 피아노 배치도 */}
         <section className="flex flex-col gap-[12px] w-full">
-          <h2 className="text-[24px] font-semibold tracking-[-0.03em] text-black px-1">피아노 배치도</h2>
+          <h2 className="text-[22px] font-bold tracking-[-0.03em] text-[#1A1A1A] px-1">피아노 배치도</h2>
           <div className="w-full bg-white/50 backdrop-blur-md rounded-[25px] p-2 border border-white/20 shadow-sm overflow-hidden flex justify-center items-center">
             <img src="/piano-layout.png" alt="피아노 배치도" className="w-full h-auto max-w-[480px] rounded-[20px]" />
           </div>
@@ -168,7 +170,7 @@ export default function Home() {
 
         {/* 3️⃣ 이달의 랭킹 TOP 3 */}
         <section className="flex flex-col gap-[12px]">
-          <h2 className="text-[24px] font-semibold leading-[29px] tracking-[-0.03em] px-1">{currentMonth}월의 랭킹 TOP 3</h2>
+          <h2 className="text-[22px] font-bold tracking-[-0.03em] text-[#1A1A1A] px-1">{currentMonth}월의 랭킹 TOP 3</h2>
           <div className="w-full h-[181px] bg-white/20 backdrop-blur-lg rounded-[20px] flex items-end justify-center px-[60px] pb-[20px] gap-[10px] border border-white/20 shadow-sm">
             {rankings[1] && (
               <div className="flex-1 bg-[#C7D4F4]/55 border border-[#B9C8ED] rounded-[5px] flex flex-col items-center justify-center py-2 transition-all" style={{ height: '73.11px' }}>
@@ -193,7 +195,7 @@ export default function Home() {
 
         {/* 4️⃣ 이용 주의사항 */}
         <section className="flex flex-col gap-[12px]">
-          <h2 className="text-[24px] font-semibold leading-[29px] tracking-[-0.03em] px-1">이용 주의사항</h2>
+          <h2 className="text-[22px] font-bold tracking-[-0.03em] text-[#1A1A1A] px-1">이용 주의사항</h2>
           <div className="w-full min-h-[161px] p-[18px_25px] bg-white/30 rounded-[20px] backdrop-blur-md border border-white/20 shadow-sm">
             <ul className="flex flex-col gap-[12px]">
               {['음식물 반입 금지 및 뒷정리 필수', '노쇼 시 향후 이용이 제한될 수 있음', '부정 정보 예약 시 강제 취소 가능'].map((text, i) => (
