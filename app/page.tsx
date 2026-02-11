@@ -86,9 +86,9 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-[#F9FAFB] font-['Pretendard'] text-[#1A1A1A] flex flex-col items-center overflow-x-hidden">
       
-      {/* 상단 헤더 - 배경 높이를 대폭 키워 버튼들 아래까지 하늘색이 오도록 수정 */}
+      {/* 상단 헤더 - 배경을 피아노 배치도 타이틀 근처까지 더 길게 내림 */}
       <div 
-        className="w-full max-w-[480px] pt-[75px] pb-[280px] px-[24px] rounded-b-[15px] relative"
+        className="w-full max-w-[480px] pt-[75px] pb-[340px] px-[24px] rounded-b-[15px] relative"
         style={{ background: 'radial-gradient(137.53% 99.23% at 92.41% 7.26%, #FFF5E4 0%, #C7D4F4 100%)' }}
       >
         <div className="flex flex-col gap-1">
@@ -99,8 +99,8 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 컨텐츠 영역 - 음수 마진을 키워 하늘색 배경 안으로 버튼들이 완전히 들어오게 설정 */}
-      <div className="w-full max-w-[480px] -mt-[240px] px-[20px] flex flex-col gap-[65px] pb-[80px] relative z-10 font-['Pretendard']">
+      {/* 컨텐츠 영역 - 음수 마진을 대폭 늘려 배경과의 겹침 정도를 최대로 조절 */}
+      <div className="w-full max-w-[480px] -mt-[300px] px-[20px] flex flex-col gap-[65px] pb-[80px] relative z-10 font-['Pretendard']">
         
         {/* 1️⃣ 예약 서비스 */}
         <section className="flex flex-col gap-[12px]">
