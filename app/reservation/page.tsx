@@ -46,22 +46,19 @@ export default function ReservationPage() {
   };
 
   const handleReserve = async (pianoName: string) => {
-    // 1. 필수 입력값 확인
     if (!formData.name || !formData.studentId || formData.start === null || formData.end === null) {
       return alert("모든 정보를 입력하고 시간을 선택해주세요.");
     }
     
-    // 2. 학번 11자리 유효성 검사 추가
-    if (formData.studentId.length !== 11) {
-      return alert("학번은 반드시 11자리로 입력해주세요.");
+    // ✅ 학번 10자리 유효성 검사로 수정
+    if (formData.studentId.length !== 10) {
+      return alert("학번은 반드시 10자리로 입력해주세요.");
     }
 
-    // 3. 시간 순서 확인
     if (formData.start >= formData.end) {
       return alert("종료 시간은 시작 시간보다 늦어야 합니다.");
     }
 
-    // 4. 중복 예약 체크
     const isOverlap = dbReservations.some(res => {
       return (
         res.piano_name === pianoName &&
@@ -181,7 +178,8 @@ export default function ReservationPage() {
                   <div className="px-6 pb-8 pt-4 bg-[#F3F6FC] flex flex-col gap-4 animate-in fade-in duration-300">
                     <div className="grid grid-cols-2 gap-3">
                       <input type="text" placeholder="이름" value={formData.name} className="w-full p-4 rounded-full bg-white text-[14px] outline-none shadow-sm border border-transparent focus:border-[#C7D4F4] placeholder:text-gray-400" onChange={(e) => setFormData({...formData, name: e.target.value})} />
-                      <input type="text" placeholder="학번" maxLength={11} value={formData.studentId} className="w-full p-4 rounded-full bg-white text-[14px] outline-none shadow-sm border border-transparent focus:border-[#C7D4F4] placeholder:text-gray-400" onChange={(e) => setFormData({...formData, studentId: e.target.value})} />
+                      {/* ✅ maxLength 10으로 수정 */}
+                      <input type="text" placeholder="학번" maxLength={10} value={formData.studentId} className="w-full p-4 rounded-full bg-white text-[14px] outline-none shadow-sm border border-transparent focus:border-[#C7D4F4] placeholder:text-gray-400" onChange={(e) => setFormData({...formData, studentId: e.target.value})} />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <select 
