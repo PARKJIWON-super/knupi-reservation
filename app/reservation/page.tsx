@@ -5,13 +5,14 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
 export default function ReservationPage() {
-  const pianos = ["1번 피아노", "2번 피아노", "3번 피아노", "4번 피아노"];
+  const pianos = ["1번 피아노", "2번 피아노", "3번 피아노", "업라이트 피아노"];
   const timeSlots = Array.from({ length: 30 }, (_, i) => 9 + i * 0.5);
 
   const [dbReservations, setDbReservations] = useState<any[]>([]);
   const [activePiano, setActivePiano] = useState<string | null>(null);
   const [showMap, setShowMap] = useState(false);
 
+  // 날짜 생성: 금일부터 14일간
   const dates = Array.from({ length: 14 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() + i);
@@ -25,7 +26,14 @@ export default function ReservationPage() {
   });
 
   const [selectedDate, setSelectedDate] = useState(dates[0].fullDate);
-  const [formData, setFormData] = useState({ name: '', studentId: '', start: 9, end: 10 });
+  
+  // start와 end의 초기값을 null로 설정하여 "시작/종료 시간" 문구가 뜨게 함
+  const [formData, setFormData] = useState({ 
+    name: '', 
+    studentId: '', 
+    start: null as number | null, 
+    end: null as number | null 
+  });
 
   const fetchReservations = async () => {
     const { data } = await supabase.from('reservations').select('*');
@@ -35,13 +43,30 @@ export default function ReservationPage() {
   useEffect(() => { fetchReservations(); }, [selectedDate]);
 
   const handleReserve = async (pianoName: string) => {
-    if (!formData.name || !formData.studentId) return alert("정보를 입력해주세요.");
+    if (!formData.name || !formData.studentId || formData.start === null || formData.end === null) {
+      return alert("모든 정보를 입력하고 시간을 선택해주세요.");
+    }
+    if (formData.start >= formData.end) {
+      return alert("종료 시간은 시작 시간보다 늦어야 합니다.");
+    }
+
     const { error } = await supabase.from('reservations').insert([{ 
-      user_name: formData.name, student_id: formData.studentId, 
-      piano_name: pianoName, data: selectedDate,
-      start_time: Number(formData.start), end_time: Number(formData.end)
+      user_name: formData.name, 
+      student_id: formData.studentId, 
+      piano_name: pianoName, 
+      data: selectedDate,
+      start_time: Number(formData.start), 
+      end_time: Number(formData.end)
     }]);
-    if (!error) { alert("🎉 예약 성공!"); setActivePiano(null); fetchReservations(); }
+
+    if (!error) { 
+      alert("🎉 예약 성공!"); 
+      setActivePiano(null); 
+      setFormData({ name: '', studentId: '', start: null, end: null });
+      fetchReservations(); 
+    } else {
+      alert("예약에 실패했습니다. 다시 시도해주세요.");
+    }
   };
 
   const currentDisplayDate = dates.find(d => d.fullDate === selectedDate) || dates[0];
@@ -102,7 +127,7 @@ export default function ReservationPage() {
           </div>
         </div>
 
-        {/* 🎹 피아노 목록 (화이트 테마 유지) */}
+        {/* 🎹 피아노 목록 */}
         <div className="flex flex-col gap-5">
           {pianos.map((piano) => {
             const isOpen = activePiano === piano;
@@ -112,8 +137,11 @@ export default function ReservationPage() {
                   <div className="flex justify-between items-center mb-6">
                     <h3 className="text-[20px] font-bold tracking-tight text-black">{piano}</h3>
                     <button 
-                      onClick={() => setActivePiano(isOpen ? null : piano)}
-                      className="px-6 py-1.5 rounded-full text-[14px] font-bold bg-[#C7D4F4] text-black shadow-sm"
+                      onClick={() => {
+                        setActivePiano(isOpen ? null : piano);
+                        setFormData({ ...formData, start: null, end: null });
+                      }}
+                      className="px-6 py-1.5 rounded-full text-[14px] font-bold bg-[#C7D4F4] text-black shadow-sm transition-transform active:scale-95"
                     >
                       {isOpen ? '닫기' : '선택'}
                     </button>
@@ -141,16 +169,27 @@ export default function ReservationPage() {
                 {isOpen && (
                   <div className="px-6 pb-8 pt-4 bg-[#F3F6FC] flex flex-col gap-4 animate-in fade-in duration-300">
                     <div className="grid grid-cols-2 gap-3">
-                      <input type="text" placeholder="이름" className="w-full p-4 rounded-full bg-white text-[14px] outline-none shadow-sm border border-transparent focus:border-[#C7D4F4]" onChange={(e) => setFormData({...formData, name: e.target.value})} />
-                      <input type="text" placeholder="학번" className="w-full p-4 rounded-full bg-white text-[14px] outline-none shadow-sm border border-transparent focus:border-[#C7D4F4]" onChange={(e) => setFormData({...formData, studentId: e.target.value})} />
+                      <input type="text" placeholder="이름" value={formData.name} className="w-full p-4 rounded-full bg-white text-[14px] outline-none shadow-sm border border-transparent focus:border-[#C7D4F4]" onChange={(e) => setFormData({...formData, name: e.target.value})} />
+                      <input type="text" placeholder="학번" value={formData.studentId} className="w-full p-4 rounded-full bg-white text-[14px] outline-none shadow-sm border border-transparent focus:border-[#C7D4F4]" onChange={(e) => setFormData({...formData, studentId: e.target.value})} />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
-                      <select className="w-full p-4 rounded-full bg-white text-[14px] outline-none appearance-none px-5 shadow-sm border border-transparent focus:border-[#C7D4F4]" value={formData.start} onChange={(e) => setFormData({...formData, start: Number(e.target.value)})}>
-                        <option value="">시작 시간</option>
+                      {/* 시작 시간 선택 */}
+                      <select 
+                        className="w-full p-4 rounded-full bg-white text-[14px] outline-none appearance-none px-5 shadow-sm border border-transparent focus:border-[#C7D4F4]" 
+                        value={formData.start ?? ""} 
+                        onChange={(e) => setFormData({...formData, start: e.target.value === "" ? null : Number(e.target.value)})}
+                      >
+                        <option value="" disabled hidden>시작 시간</option>
                         {timeSlots.map(t => <option key={t} value={t}>{t % 1 === 0 ? `${t}:00` : `${Math.floor(t)}:30`}</option>)}
                       </select>
-                      <select className="w-full p-4 rounded-full bg-white text-[14px] outline-none appearance-none px-5 shadow-sm border border-transparent focus:border-[#C7D4F4]" value={formData.end} onChange={(e) => setFormData({...formData, end: Number(e.target.value)})}>
-                        <option value="">종료 시간</option>
+
+                      {/* 종료 시간 선택 */}
+                      <select 
+                        className="w-full p-4 rounded-full bg-white text-[14px] outline-none appearance-none px-5 shadow-sm border border-transparent focus:border-[#C7D4F4]" 
+                        value={formData.end ?? ""} 
+                        onChange={(e) => setFormData({...formData, end: e.target.value === "" ? null : Number(e.target.value)})}
+                      >
+                        <option value="" disabled hidden>종료 시간</option>
                         {timeSlots.map(t => <option key={t} value={t}>{t % 1 === 0 ? `${t}:00` : `${Math.floor(t)}:30`}</option>)}
                       </select>
                     </div>
