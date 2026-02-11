@@ -92,10 +92,6 @@ export default function ReservationPage() {
           <span className="text-[24px] font-semibold tracking-tight">
             {currentDisplayDate.monthName}, {currentDisplayDate.year}
           </span>
-          <div className="flex gap-4">
-            <button className="w-6 h-6 rotate-180 opacity-30"><svg viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2"><path d="M9 5l7 7-7 7"/></svg></button>
-            <button className="w-6 h-6"><svg viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2"><path d="M9 5l7 7-7 7"/></svg></button>
-          </div>
         </div>
 
         {/* 날짜 스크롤 */}
@@ -113,7 +109,7 @@ export default function ReservationPage() {
         <div className="flex justify-start mb-8 mt-4">
           <button onClick={() => setShowMap(true)}
             className="flex items-center gap-2 bg-[#C7D4F4] px-5 py-2 rounded-full shadow-sm font-bold text-[15px]">
-            피아노 배치도 <svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="2" fill="none"/></svg>
+            피아노 배치도
           </button>
         </div>
 

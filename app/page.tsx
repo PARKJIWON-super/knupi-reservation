@@ -103,14 +103,25 @@
                   <input type="text" placeholder="학번" className="w-full p-4 rounded-[12px] bg-white border-0 shadow-sm text-sm outline-none" onChange={(e) => setInfo({...info, studentId: e.target.value})} />
                   <button onClick={handleSearch} disabled={isSearching} className="w-full bg-[#1A1A1A] text-white font-bold py-4 rounded-[12px] text-sm shadow-lg active:scale-95 transition-all">조회하기</button>
                   <div className="mt-4 flex flex-col gap-3">
-                    {myReservations.map((res) => (
-                      <div key={res.id} className="bg-white p-4 rounded-[12px] shadow-sm flex justify-between items-center border border-blue-50">
-                        <div><span className="text-[10px] font-bold text-blue-600 block mb-1">{res.piano_name}</span><p className="text-sm font-bold">{res.data} 예약</p>
-                        <p className="text-[11px] text-gray-400">{formatTime(res.start_time)} - {formatTime(res.end_time)}</p></div>
-                        <button onClick={() => handleDelete(res.id)} className="text-red-500 text-xs font-bold px-3 py-2 hover:bg-red-50 rounded-lg">취소</button>
-                      </div>
-                    ))}
-                  </div>
+  {myReservations.map((res) => (
+    <div key={res.id} className="bg-white p-4 rounded-[12px] shadow-sm flex justify-between items-center border border-blue-50">
+      <div>
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-[10px] font-bold text-blue-600">{res.piano_name}</span>
+          {/* ✅ 운영자일 경우 예약자 이름 표시 태그 추가 */}
+          {isAdmin && (
+            <span className="text-[10px] bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded-md font-bold">
+              예약자: {res.user_name}
+            </span>
+          )}
+        </div>
+        <p className="text-sm font-bold">{res.data} 예약</p>
+        <p className="text-[11px] text-gray-400">{formatTime(res.start_time)} - {formatTime(res.end_time)}</p>
+      </div>
+      <button onClick={() => handleDelete(res.id)} className="text-red-500 text-xs font-bold px-3 py-2 hover:bg-red-50 rounded-lg">취소</button>
+    </div>
+  ))}
+</div>
                 </div>
               </div>
             )}
