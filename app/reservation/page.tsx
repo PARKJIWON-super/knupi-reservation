@@ -101,8 +101,12 @@ export default function ReservationPage() {
       <div className="w-full max-w-[480px] px-[20px] relative z-10 pt-[60px]">
         <div className="flex justify-between items-center mb-10">
           <h1 className="text-[32px] font-bold tracking-tight">Calendar</h1>
-          <Link href="/" className="w-8 h-8 flex items-center justify-center bg-[#1C1B1F] rounded-md transition-transform active:scale-90">
-             <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+          {/* ✅ 사진 스타일로 변경된 홈 아이콘 */}
+          <Link href="/" className="transition-transform active:scale-90">
+             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+               <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+               <polyline points="9 22 9 12 15 12 15 22"></polyline>
+             </svg>
           </Link>
         </div>
 
@@ -165,7 +169,6 @@ export default function ReservationPage() {
                       ))}
                     </div>
                     
-                    {/* 타임라인 바 컨테이너 */}
                     <div className="relative h-2.5 bg-gray-100 rounded-full flex gap-[1px]">
                       {timeSlots.map(t => {
                         const res = dbReservations.find(r => r.piano_name === piano && String(r.data) === selectedDate && t >= r.start_time && t < r.end_time);
@@ -182,11 +185,9 @@ export default function ReservationPage() {
                             }}
                             className={`flex-1 h-full first:rounded-l-full last:rounded-r-full transition-all relative ${res ? 'bg-[#C7D4F4] cursor-help' : 'bg-transparent'}`} 
                           >
-                            {/* ✅ 클릭 시 나타나는 이름 툴팁 */}
                             {tooltip?.piano === piano && tooltip?.time === t && (
                                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-black text-white text-[10px] rounded whitespace-nowrap z-50 animate-in fade-in slide-in-from-bottom-1">
                                     {tooltip.name} 님
-                                    {/* 툴팁 화살표 */}
                                     <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-black"></div>
                                 </div>
                             )}
