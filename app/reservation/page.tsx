@@ -204,10 +204,13 @@ export default function ReservationPage() {
           })}
         </div>
 
-        {/* ✅ 예약 확정 성공 모달 - 배경색만 #C7D4F4 단색으로 변경 */}
+        {/* ✅ 예약 확정 성공 모달 - #FFF5E4와 #C7D4F4가 섞인 배경 적용 */}
         {showSuccessModal && confirmedInfo && (
           <div className="fixed inset-0 z-[200] flex items-end justify-center bg-black/50 backdrop-blur-sm transition-all animate-in fade-in duration-300">
-            <div className="w-full max-w-[480px] bg-[#C7D4F4] rounded-t-[40px] p-8 pb-12 flex flex-col items-center animate-in slide-in-from-bottom-full duration-500 shadow-2xl">
+            <div 
+              className="w-full max-w-[480px] rounded-t-[40px] p-8 pb-12 flex flex-col items-center animate-in slide-in-from-bottom-full duration-500 shadow-2xl relative"
+              style={{ background: 'linear-gradient(135deg, #FFF5E4 0%, #C7D4F4 100%)' }}
+            >
               <div className="w-12 h-1.5 bg-black/10 rounded-full mb-8"></div>
               
               <div className="w-20 h-20 bg-white/80 rounded-full flex items-center justify-center mb-6 shadow-sm">
