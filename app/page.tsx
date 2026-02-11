@@ -10,31 +10,33 @@ export default function Home() {
   const [myReservations, setMyReservations] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [rankings, setRankings] = useState<{ name: string, total: number }[]>([]);
-
+  const [rankings, setRankings] = useState<{name: string, total: number}[]>([]);
+  
   const currentMonth = new Date().getMonth() + 1;
 
-  // 피그마 디자인을 반영한 공통 화살표 아이콘 컴포넌트
-  const ArrowIcon = () => (
+  // ✅ 이미지와 피그마 데이터를 반영한 화살표 아이콘 컴포넌트
+  const FigmaArrowIcon = () => (
     <div className="relative w-[24px] h-[24px] flex-none order-1 grow-0 shrink-0">
-      {/* Bounding box */}
+      {/* Bounding box: 기본 회색, 호버 시 검정색으로 변경 */}
       <div className="absolute inset-0 bg-[#D9D9D9] rounded-full group-hover:bg-black transition-colors duration-200"></div>
-      {/* arrow_forward_ios (SVG로 형상화) */}
+      
+      {/* arrow_forward_ios: 이미지 속 꺾쇠 모양 재현 */}
       <svg 
-        className="absolute w-[6px] h-[10px]" 
+        className="absolute" 
         style={{ 
-          left: '28.18%', 
+          width: '6.5px', // 꺾쇠의 너비
+          height: '11px', // 꺾쇠의 높이
+          left: '50%', 
           top: '50%', 
-          transform: 'translateY(-50%)',
-          height: '18.99px' // 피그마 지정 높이 반영
+          transform: 'translate(-40%, -50%)' // 시각적 중앙 정렬 조정
         }} 
-        viewBox="0 0 10 18" 
+        viewBox="0 0 9 14" 
         fill="none"
       >
         <path 
-          d="M2 2L8 9L2 16" 
-          stroke="white" // 배경이 검정으로 변할 때 가독성을 위해 흰색 적용
-          strokeWidth="2.5" 
+          d="M1.5 1.5L7 7L1.5 12.5" 
+          stroke="white" 
+          strokeWidth="2.2" // 이미지 속 꺾쇠 두께 반영
           strokeLinecap="round" 
           strokeLinejoin="round"
         />
@@ -83,12 +85,12 @@ export default function Home() {
     const now = new Date();
     const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     let query = supabase.from('reservations').select('*');
-    if (info.name === '운영자' && info.studentId === '12345') {
-      setIsAdmin(true);
-      query = query.order('data', { ascending: true });
-    } else {
-      setIsAdmin(false);
-      query = query.eq('user_name', info.name).eq('student_id', info.studentId).gte('data', today).order('data', { ascending: true });
+    if (info.name === '운영자' && info.studentId === '12345') { 
+      setIsAdmin(true); 
+      query = query.order('data', { ascending: true }); 
+    } else { 
+      setIsAdmin(false); 
+      query = query.eq('user_name', info.name).eq('student_id', info.studentId).gte('data', today).order('data', { ascending: true }); 
     }
     const { data, error } = await query;
     if (!error) { setMyReservations(data || []); if (data?.length === 0) alert("오늘 이후의 예약 내역이 없습니다."); }
@@ -98,10 +100,10 @@ export default function Home() {
   const handleDelete = async (id: string) => {
     if (!confirm("정말로 이 예약을 취소하시겠습니까?")) return;
     const { error } = await supabase.from('reservations').delete().eq('id', id);
-    if (!error) {
-      setMyReservations((prev) => prev.filter((res) => res.id !== id));
-      alert("✅ 예약이 취소되었습니다.");
-      fetchRankings();
+    if (!error) { 
+      setMyReservations((prev) => prev.filter((res) => res.id !== id)); 
+      alert("✅ 예약이 취소되었습니다."); 
+      fetchRankings(); 
     }
   };
 
@@ -121,7 +123,7 @@ export default function Home() {
         
         {/* 1️⃣ 예약 서비스 */}
         <section className="flex flex-col gap-[12px]">
-          <h2 className="text-[24px] font-semibold leading-[29px] tracking-[-0.03em] text-black">예약 서비스</h2>
+          <h2 className="text-[24px] font-semibold leading-[29px] tracking-[-0.03em] text-black px-1">예약 서비스</h2>
           <div className="flex flex-col gap-[10px]">
             {/* 연습실 예약하기 */}
             <Link href="/reservation">
@@ -130,8 +132,8 @@ export default function Home() {
                   <span className="text-[20px] font-semibold leading-[24px] tracking-[-0.03em]">연습실 예약하기</span>
                   <span className="text-[16px] text-[#B2B2B2] leading-[19px] tracking-[-0.03em]">실시간 현황 확인 및 예약</span>
                 </div>
-                {/* ✅ 수정된 아이콘 */}
-                <ArrowIcon />
+                {/* 아이콘 교체 */}
+                <FigmaArrowIcon />
               </div>
             </Link>
 
@@ -141,11 +143,12 @@ export default function Home() {
                 <span className="text-[20px] font-semibold leading-[24px] tracking-[-0.03em]">내 예약 확인하기</span>
                 <span className="text-[16px] text-[#B2B2B2] leading-[19px] tracking-[-0.03em]">이름과 학번으로 조회</span>
               </div>
-              {/* ✅ 수정된 아이콘 */}
-              <ArrowIcon />
+              {/* 아이콘 교체 */}
+              <FigmaArrowIcon />
             </div>
           </div>
-          
+
+          {/* ... 이하 검색 결과 로직 및 다른 섹션 유지 ... */}
           {showLookup && (
             <div className="mt-2 p-6 bg-white/60 backdrop-blur-xl rounded-[20px] border border-white/40 shadow-xl animate-in fade-in slide-in-from-top-4 duration-500">
               <div className="flex flex-col gap-3">
@@ -176,7 +179,7 @@ export default function Home() {
           )}
         </section>
 
-        {/* 2️⃣ 피아노 배치도 */}
+        {/* 2️⃣ 피아노 배치도 섹션 */}
         <section className="flex flex-col gap-[12px] w-full">
           <h2 className="text-[24px] font-semibold tracking-[-0.03em] text-black px-1">피아노 배치도</h2>
           <div className="w-full bg-white/50 backdrop-blur-md rounded-[25px] p-2 border border-white/20 shadow-sm overflow-hidden flex justify-center items-center">
@@ -184,7 +187,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 3️⃣ 이달의 랭킹 TOP 3 */}
+        {/* ... 나머지 코드 유지 ... */}
         <section className="flex flex-col gap-[12px]">
           <h2 className="text-[24px] font-semibold leading-[29px] tracking-[-0.03em] px-1">{currentMonth}월의 랭킹 TOP 3</h2>
           <div className="w-full h-[181px] bg-white/20 backdrop-blur-lg rounded-[20px] flex items-end justify-center px-[60px] pb-[20px] gap-[10px] border border-white/20 shadow-sm">
@@ -209,7 +212,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 4️⃣ 이용 주의사항 */}
         <section className="flex flex-col gap-[12px]">
           <h2 className="text-[24px] font-semibold leading-[29px] tracking-[-0.03em] px-1">이용 주의사항</h2>
           <div className="w-full min-h-[161px] p-[18px_25px] bg-white/30 rounded-[20px] backdrop-blur-md border border-white/20 shadow-sm">
