@@ -14,36 +14,6 @@ export default function Home() {
   
   const currentMonth = new Date().getMonth() + 1;
 
-  // ✅ 이미지와 피그마 데이터를 반영한 화살표 아이콘 컴포넌트
-  const FigmaArrowIcon = () => (
-    <div className="relative w-[24px] h-[24px] flex-none order-1 grow-0 shrink-0">
-      {/* Bounding box: 기본 회색, 호버 시 검정색으로 변경 */}
-      <div className="absolute inset-0 bg-[#D9D9D9] rounded-full group-hover:bg-black transition-colors duration-200"></div>
-      
-      {/* arrow_forward_ios: 이미지 속 꺾쇠 모양 재현 */}
-      <svg 
-        className="absolute" 
-        style={{ 
-          width: '6.5px', // 꺾쇠의 너비
-          height: '11px', // 꺾쇠의 높이
-          left: '50%', 
-          top: '50%', 
-          transform: 'translate(-40%, -50%)' // 시각적 중앙 정렬 조정
-        }} 
-        viewBox="0 0 9 14" 
-        fill="none"
-      >
-        <path 
-          d="M1.5 1.5L7 7L1.5 12.5" 
-          stroke="white" 
-          strokeWidth="2.2" // 이미지 속 꺾쇠 두께 반영
-          strokeLinecap="round" 
-          strokeLinejoin="round"
-        />
-      </svg>
-    </div>
-  );
-
   const formatTime = (time: number) => {
     const hours = Math.floor(time);
     const minutes = (time % 1) === 0.5 ? '30' : '00';
@@ -53,6 +23,7 @@ export default function Home() {
   const fetchRankings = async () => {
     const now = new Date();
     const firstDayOfMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+    
     const { data } = await supabase
       .from('reservations')
       .select('user_name, student_id, start_time, end_time')
@@ -62,6 +33,7 @@ export default function Home() {
       const aggregate = data.reduce((acc: any, cur) => {
         const userKey = `${cur.user_name}_${cur.student_id}`;
         const duration = cur.end_time - cur.start_time;
+        
         if (!acc[userKey]) {
           acc[userKey] = { name: cur.user_name, total: 0 };
         }
@@ -70,9 +42,13 @@ export default function Home() {
       }, {});
 
       const sorted = Object.values(aggregate)
-        .map((item: any) => ({ name: item.name, total: item.total }))
+        .map((item: any) => ({ 
+          name: item.name, 
+          total: item.total 
+        }))
         .sort((a, b) => b.total - a.total)
         .slice(0, 3);
+
       setRankings(sorted);
     }
   };
@@ -123,32 +99,35 @@ export default function Home() {
         
         {/* 1️⃣ 예약 서비스 */}
         <section className="flex flex-col gap-[12px]">
-          <h2 className="text-[24px] font-semibold leading-[29px] tracking-[-0.03em] text-black px-1">예약 서비스</h2>
+          <h2 className="text-[24px] font-semibold leading-[29px] tracking-[-0.03em] text-black">예약 서비스</h2>
           <div className="flex flex-col gap-[10px]">
-            {/* 연습실 예약하기 */}
             <Link href="/reservation">
               <div className="flex justify-between items-center w-full h-[105px] px-[30px] bg-white/30 backdrop-blur-[20px] rounded-[20px] border border-white/20 hover:bg-white/40 shadow-sm transition-all cursor-pointer group">
                 <div className="flex flex-col gap-[8px]">
                   <span className="text-[20px] font-semibold leading-[24px] tracking-[-0.03em]">연습실 예약하기</span>
                   <span className="text-[16px] text-[#B2B2B2] leading-[19px] tracking-[-0.03em]">실시간 현황 확인 및 예약</span>
                 </div>
-                {/* 아이콘 교체 */}
-                <FigmaArrowIcon />
+                {/* 사진 스타일로 변경된 화살표 */}
+                <div className="w-[32px] h-[32px] flex items-center justify-center transition-transform group-hover:translate-x-1">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                    <path d="M9 5L16 12L9 19" stroke="#1A1A1A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
               </div>
             </Link>
-
-            {/* 내 예약 확인하기 */}
             <div onClick={() => setShowLookup(!showLookup)} className="flex justify-between items-center w-full h-[105px] px-[30px] bg-white/30 backdrop-blur-[20px] rounded-[20px] border border-white/20 hover:bg-white/40 shadow-sm cursor-pointer transition-all group">
               <div className="flex flex-col gap-[8px]">
                 <span className="text-[20px] font-semibold leading-[24px] tracking-[-0.03em]">내 예약 확인하기</span>
                 <span className="text-[16px] text-[#B2B2B2] leading-[19px] tracking-[-0.03em]">이름과 학번으로 조회</span>
               </div>
-              {/* 아이콘 교체 */}
-              <FigmaArrowIcon />
+              {/* 사진 스타일로 변경된 화살표 */}
+              <div className="w-[32px] h-[32px] flex items-center justify-center transition-transform group-hover:translate-x-1">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                  <path d="M9 5L16 12L9 19" stroke="#1A1A1A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
             </div>
           </div>
-
-          {/* ... 이하 검색 결과 로직 및 다른 섹션 유지 ... */}
           {showLookup && (
             <div className="mt-2 p-6 bg-white/60 backdrop-blur-xl rounded-[20px] border border-white/40 shadow-xl animate-in fade-in slide-in-from-top-4 duration-500">
               <div className="flex flex-col gap-3">
@@ -179,7 +158,7 @@ export default function Home() {
           )}
         </section>
 
-        {/* 2️⃣ 피아노 배치도 섹션 */}
+        {/* 2️⃣ 피아노 배치도 */}
         <section className="flex flex-col gap-[12px] w-full">
           <h2 className="text-[24px] font-semibold tracking-[-0.03em] text-black px-1">피아노 배치도</h2>
           <div className="w-full bg-white/50 backdrop-blur-md rounded-[25px] p-2 border border-white/20 shadow-sm overflow-hidden flex justify-center items-center">
@@ -187,7 +166,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ... 나머지 코드 유지 ... */}
+        {/* 3️⃣ 이달의 랭킹 TOP 3 */}
         <section className="flex flex-col gap-[12px]">
           <h2 className="text-[24px] font-semibold leading-[29px] tracking-[-0.03em] px-1">{currentMonth}월의 랭킹 TOP 3</h2>
           <div className="w-full h-[181px] bg-white/20 backdrop-blur-lg rounded-[20px] flex items-end justify-center px-[60px] pb-[20px] gap-[10px] border border-white/20 shadow-sm">
@@ -212,6 +191,7 @@ export default function Home() {
           </div>
         </section>
 
+        {/* 4️⃣ 이용 주의사항 */}
         <section className="flex flex-col gap-[12px]">
           <h2 className="text-[24px] font-semibold leading-[29px] tracking-[-0.03em] px-1">이용 주의사항</h2>
           <div className="w-full min-h-[161px] p-[18px_25px] bg-white/30 rounded-[20px] backdrop-blur-md border border-white/20 shadow-sm">
@@ -230,6 +210,7 @@ export default function Home() {
           </div>
         </section>
 
+        {/* 푸터 */}
         <footer className="text-center pt-[10px] pb-[30px]">
           <p className="text-[12px] font-light tracking-[0.04em] text-[#999999]">
             © KYUNGPOOK NATIONAL UNIV. PIANO CLUB KNUPI
