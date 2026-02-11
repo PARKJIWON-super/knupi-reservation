@@ -12,7 +12,6 @@ export default function ReservationPage() {
   const [activePiano, setActivePiano] = useState<string | null>(null);
   const [showMap, setShowMap] = useState(false);
 
-  // 날짜 생성: 금일부터 14일간
   const dates = Array.from({ length: 14 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() + i);
@@ -26,8 +25,6 @@ export default function ReservationPage() {
   });
 
   const [selectedDate, setSelectedDate] = useState(dates[0].fullDate);
-  
-  // start와 end의 초기값을 null로 설정하여 "시작/종료 시간" 문구가 뜨게 함
   const [formData, setFormData] = useState({ 
     name: '', 
     studentId: '', 
@@ -48,6 +45,20 @@ export default function ReservationPage() {
     }
     if (formData.start >= formData.end) {
       return alert("종료 시간은 시작 시간보다 늦어야 합니다.");
+    }
+
+    // ✅ 중복 예약 체크 로직 추가
+    const isOverlap = dbReservations.some(res => {
+      return (
+        res.piano_name === pianoName &&
+        String(res.data) === String(selectedDate) &&
+        formData.start! < res.end_time && 
+        formData.end! > res.start_time
+      );
+    });
+
+    if (isOverlap) {
+      return alert("❌ 죄송합니다. 선택하신 시간대에 이미 예약이 존재합니다.");
     }
 
     const { error } = await supabase.from('reservations').insert([{ 
@@ -73,13 +84,10 @@ export default function ReservationPage() {
 
   return (
     <main className="min-h-screen bg-[#F9FAFB] font-['Pretendard'] text-[#1A1A1A] flex flex-col items-center pb-20">
-      
-      {/* 상단 그래디언트 배경 */}
       <div className="w-full max-w-[480px] h-[310px] absolute top-[-12px] rounded-[15px] z-0 shadow-sm"
         style={{ background: 'radial-gradient(137.53% 99.23% at 92.41% 7.26%, #FFF5E4 0%, #C7D4F4 100%)' }} />
 
       <div className="w-full max-w-[480px] px-[20px] relative z-10 pt-[60px]">
-        {/* 상단 타이틀 바 */}
         <div className="flex justify-between items-center mb-10">
           <h1 className="text-[32px] font-bold tracking-tight">Calendar</h1>
           <Link href="/" className="w-8 h-8 flex items-center justify-center bg-[#1C1B1F] rounded-md transition-transform active:scale-90">
@@ -87,14 +95,12 @@ export default function ReservationPage() {
           </Link>
         </div>
 
-        {/* 월 표시 */}
         <div className="flex justify-between items-center mb-6">
           <span className="text-[24px] font-semibold tracking-tight">
             {currentDisplayDate.monthName}, {currentDisplayDate.year}
           </span>
         </div>
 
-        {/* 날짜 스크롤 */}
         <div className="flex gap-7 overflow-x-auto pb-6 scrollbar-hide px-1">
           {dates.map((d) => (
             <button key={d.fullDate} onClick={() => setSelectedDate(d.fullDate)}
@@ -105,7 +111,6 @@ export default function ReservationPage() {
           ))}
         </div>
 
-        {/* 📍 배치도 버튼 */}
         <div className="flex justify-start mb-8 mt-4">
           <button onClick={() => setShowMap(true)}
             className="flex items-center gap-2 bg-[#C7D4F4] px-5 py-2 rounded-full shadow-sm font-bold text-[15px]">
@@ -113,7 +118,6 @@ export default function ReservationPage() {
           </button>
         </div>
 
-        {/* 범례 표시 */}
         <div className="flex justify-end gap-4 mb-4 px-1">
           <div className="flex items-center gap-1.5 text-[13px] text-gray-500 font-medium">
             <div className="w-2 h-2 bg-[#C7D4F4]/40 rounded-full"></div> 예약 가능
@@ -123,7 +127,6 @@ export default function ReservationPage() {
           </div>
         </div>
 
-        {/* 🎹 피아노 목록 */}
         <div className="flex flex-col gap-5">
           {pianos.map((piano) => {
             const isOpen = activePiano === piano;
@@ -143,7 +146,6 @@ export default function ReservationPage() {
                     </button>
                   </div>
 
-                  {/* 타임라인 바 */}
                   <div className="relative pt-4 pb-2">
                     <div className="flex justify-between mb-2 px-1">
                       {[9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24].map(h => (
@@ -161,7 +163,6 @@ export default function ReservationPage() {
                   </div>
                 </div>
 
-                {/* 폼 영역 (연한 배경 유지) */}
                 {isOpen && (
                   <div className="px-6 pb-8 pt-4 bg-[#F3F6FC] flex flex-col gap-4 animate-in fade-in duration-300">
                     <div className="grid grid-cols-2 gap-3">
@@ -169,7 +170,6 @@ export default function ReservationPage() {
                       <input type="text" placeholder="학번" value={formData.studentId} className="w-full p-4 rounded-full bg-white text-[14px] outline-none shadow-sm border border-transparent focus:border-[#C7D4F4]" onChange={(e) => setFormData({...formData, studentId: e.target.value})} />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
-                      {/* 시작 시간 선택 */}
                       <select 
                         className="w-full p-4 rounded-full bg-white text-[14px] outline-none appearance-none px-5 shadow-sm border border-transparent focus:border-[#C7D4F4]" 
                         value={formData.start ?? ""} 
@@ -178,8 +178,6 @@ export default function ReservationPage() {
                         <option value="" disabled hidden>시작 시간</option>
                         {timeSlots.map(t => <option key={t} value={t}>{t % 1 === 0 ? `${t}:00` : `${Math.floor(t)}:30`}</option>)}
                       </select>
-
-                      {/* 종료 시간 선택 */}
                       <select 
                         className="w-full p-4 rounded-full bg-white text-[14px] outline-none appearance-none px-5 shadow-sm border border-transparent focus:border-[#C7D4F4]" 
                         value={formData.end ?? ""} 
@@ -202,7 +200,6 @@ export default function ReservationPage() {
           })}
         </div>
 
-        {/* 배치도 모달 */}
         {showMap && (
           <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-6" onClick={() => setShowMap(false)}>
             <div className="relative max-w-[400px] w-full bg-white rounded-[30px] p-2 shadow-2xl overflow-hidden">
