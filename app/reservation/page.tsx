@@ -9,13 +9,13 @@ export default function ReservationPage() {
   const timeSlots = Array.from({ length: 30 }, (_, i) => 9 + i * 0.5);
   const endSlots = Array.from({ length: 31 }, (_, i) => 9 + i * 0.5).filter(t => t > 9);
 
-  const [dbReservations, setDbReservations] = useState<any[]>([]);
-  const [activePiano, setActivePiano] = useState<string | null>(null);
+  const [dbReservations, setDbReservations] = useState([]);
+  const [activePiano, setActivePiano] = useState(null);
   const [showMap, setShowMap] = useState(false);
-  const [tooltip, setTooltip] = useState<{ piano: string; time: number; name: string } | null>(null);
+  const [tooltip, setTooltip] = useState(null);
   
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [confirmedInfo, setConfirmedInfo] = useState<any>(null);
+  const [confirmedInfo, setConfirmedInfo] = useState(null);
 
   const dates = Array.from({ length: 14 }, (_, i) => {
     const d = new Date();
@@ -33,8 +33,8 @@ export default function ReservationPage() {
   const [formData, setFormData] = useState({ 
     name: '', 
     studentId: '', 
-    start: null as number | null, 
-    end: null as number | null 
+    start: null, 
+    end: null 
   });
 
   const fetchReservations = async () => {
@@ -44,12 +44,12 @@ export default function ReservationPage() {
 
   useEffect(() => { fetchReservations(); }, [selectedDate]);
 
-  const formatTimeDisplay = (t: number) => {
+  const formatTimeDisplay = (t) => {
     if (t === 24) return "24:00";
     return t % 1 === 0 ? `${t}:00` : `${Math.floor(t)}:30`;
   };
 
-  const handleReserve = async (pianoName: string) => {
+  const handleReserve = async (pianoName) => {
     if (!formData.name || !formData.studentId || formData.start === null || formData.end === null) {
       return alert("모든 정보를 입력하고 시간을 선택해주세요.");
     }
@@ -64,8 +64,8 @@ export default function ReservationPage() {
       return (
         res.piano_name === pianoName &&
         String(res.data) === String(selectedDate) &&
-        formData.start! < res.end_time && 
-        formData.end! > res.start_time
+        formData.start < res.end_time && 
+        formData.end > res.start_time
       );
     });
 
@@ -103,7 +103,6 @@ export default function ReservationPage() {
         style={{ background: 'radial-gradient(137.53% 99.23% at 92.41% 7.26%, #FFF5E4 0%, #C7D4F4 100%)' }} />
 
       <div className="w-full max-w-[480px] px-[20px] relative z-10 pt-[60px]">
-        {/* 헤더 및 캘린더 섹션 (기존 코드 유지) */}
         <div className="flex justify-between items-center mb-10">
           <h1 className="text-[32px] font-bold tracking-tight">Calendar</h1>
           <Link href="/" className="transition-transform active:scale-90">
@@ -137,7 +136,6 @@ export default function ReservationPage() {
           </button>
         </div>
 
-        {/* 피아노 리스트 섹션 (기존 코드 유지) */}
         <div className="flex flex-col gap-5">
           {pianos.map((piano) => {
             const isOpen = activePiano === piano;
@@ -206,39 +204,45 @@ export default function ReservationPage() {
           })}
         </div>
 
-        {/* ✅ 예약 확정 성공 모달 */}
+        {/* ✅ 예약 확정 성공 모달 - 배경 그라데이션 적용 */}
         {showSuccessModal && confirmedInfo && (
           <div className="fixed inset-0 z-[200] flex items-end justify-center bg-black/50 backdrop-blur-sm transition-all animate-in fade-in duration-300">
-            <div className="w-full max-w-[480px] bg-white rounded-t-[40px] p-8 pb-12 flex flex-col items-center animate-in slide-in-from-bottom-full duration-500 shadow-2xl">
-              <div className="w-12 h-1.5 bg-gray-200 rounded-full mb-8"></div>
+            <div 
+              className="w-full max-w-[480px] rounded-t-[40px] p-8 pb-12 flex flex-col items-center animate-in slide-in-from-bottom-full duration-500 shadow-2xl relative overflow-hidden"
+              style={{ background: 'radial-gradient(137.53% 99.23% at 92.41% 7.26%, #FFF5E4 0%, #C7D4F4 100%)' }}
+            >
+              {/* 상단 핸들 바 */}
+              <div className="w-12 h-1.5 bg-black/10 rounded-full mb-8"></div>
               
-              <div className="w-20 h-20 bg-[#F3F6FC] rounded-full flex items-center justify-center mb-6">
+              {/* 체크 아이콘 */}
+              <div className="w-20 h-20 bg-white/60 backdrop-blur-md rounded-full flex items-center justify-center mb-6 shadow-sm">
                 <div className="w-10 h-10 rounded-full border-4 border-[#C7D4F4] flex items-center justify-center">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6C86D3" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                 </div>
               </div>
 
-              <h2 className="text-[26px] font-bold mb-8">
+              <h2 className="text-[26px] font-bold mb-8 tracking-tight">
                 예약이 <span className="text-[#C7A27C]">확정되었습니다</span>
               </h2>
 
-              <div className="w-full bg-white border border-gray-100 rounded-[25px] p-6 shadow-sm mb-10 flex flex-col items-center">
+              {/* 예약 정보 카드 - 반투명 처리로 배경 비침 효과 */}
+              <div className="w-full bg-white/60 backdrop-blur-md border border-white/40 rounded-[25px] p-6 shadow-sm mb-10 flex flex-col items-center">
                 <span className="text-[18px] font-bold text-gray-800 mb-2">{confirmedInfo.piano_name}</span>
                 <span className="text-[16px] font-medium text-[#6C86D3]">
                   {confirmedInfo.data.replace(/-/g, '.')} <span className="text-gray-900 ml-1">{formatTimeDisplay(confirmedInfo.start_time)}~{formatTimeDisplay(confirmedInfo.end_time)}</span>
                 </span>
               </div>
 
-              <div className="w-full bg-[#F9FAFB] rounded-[20px] p-6 mb-8">
+              {/* 이용 주의사항 섹션 */}
+              <div className="w-full bg-white/40 backdrop-blur-sm rounded-[20px] p-6 mb-8 border border-white/20">
                 <p className="font-bold text-[15px] mb-4 flex items-center gap-2">⚠️ 이용 주의사항</p>
-                <ul className="text-[14px] text-gray-600 space-y-3 font-medium">
+                <ul className="text-[14px] text-gray-700 space-y-3 font-medium">
                   <li className="flex items-center gap-2">• 음식물 반입 금지 🚫</li>
                   <li className="flex items-center gap-2">• 뒷정리 필수 ‼️</li>
                   <li className="flex items-center gap-2">• 노쇼 시 향후 이용이 제한될 수 있습니다. 😔</li>
                 </ul>
-                <div className="mt-6 pt-4 border-t border-dashed border-gray-200 text-center">
-                   <p className="text-[12px] text-gray-400 mb-1">💬 문의 : 크누피 집행부</p>
-                   {/* ✅ 사이소리함 클릭 시 카카오톡 오픈채팅방 이동 */}
+                <div className="mt-6 pt-4 border-t border-dashed border-black/10 text-center">
+                   <p className="text-[12px] text-gray-500 mb-1">💬 문의 : 크누피 집행부</p>
                    <a 
                     href="https://open.kakao.com/o/s5DRwRei" 
                     target="_blank" 
