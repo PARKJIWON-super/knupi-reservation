@@ -14,7 +14,6 @@ export default function ReservationPage() {
   const [showMap, setShowMap] = useState(false);
   const [tooltip, setTooltip] = useState<{ piano: string; time: number; name: string } | null>(null);
   
-  // ✅ 예약 확정 모달 상태 추가
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [confirmedInfo, setConfirmedInfo] = useState<any>(null);
 
@@ -86,7 +85,6 @@ export default function ReservationPage() {
     const { error } = await supabase.from('reservations').insert([reservationData]);
 
     if (!error) { 
-      // ✅ 예약 성공 시 모달 띄우기
       setConfirmedInfo(reservationData);
       setShowSuccessModal(true);
       setActivePiano(null); 
@@ -105,6 +103,7 @@ export default function ReservationPage() {
         style={{ background: 'radial-gradient(137.53% 99.23% at 92.41% 7.26%, #FFF5E4 0%, #C7D4F4 100%)' }} />
 
       <div className="w-full max-w-[480px] px-[20px] relative z-10 pt-[60px]">
+        {/* 헤더 및 캘린더 섹션 (기존 코드 유지) */}
         <div className="flex justify-between items-center mb-10">
           <h1 className="text-[32px] font-bold tracking-tight">Calendar</h1>
           <Link href="/" className="transition-transform active:scale-90">
@@ -115,7 +114,6 @@ export default function ReservationPage() {
           </Link>
         </div>
 
-        {/* ... (중략: 날짜 선택 및 배치도 버튼 섹션 동일) ... */}
         <div className="flex justify-between items-center mb-6">
           <span className="text-[24px] font-semibold tracking-tight">
             {currentDisplayDate.monthName}, {currentDisplayDate.year}
@@ -139,7 +137,7 @@ export default function ReservationPage() {
           </button>
         </div>
 
-        {/* 피아노 리스트 섹션 */}
+        {/* 피아노 리스트 섹션 (기존 코드 유지) */}
         <div className="flex flex-col gap-5">
           {pianos.map((piano) => {
             const isOpen = activePiano === piano;
@@ -159,7 +157,6 @@ export default function ReservationPage() {
                       {isOpen ? '닫기' : '선택'}
                     </button>
                   </div>
-                  {/* ... 타임라인 코드 생략 ... */}
                   <div className="relative pt-4 pb-2">
                     <div className="flex justify-between mb-2 px-1">
                       {[9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24].map(h => (
@@ -209,14 +206,12 @@ export default function ReservationPage() {
           })}
         </div>
 
-        {/* ✅ 예약 확정 성공 모달 (사진 스타일) */}
+        {/* ✅ 예약 확정 성공 모달 */}
         {showSuccessModal && confirmedInfo && (
           <div className="fixed inset-0 z-[200] flex items-end justify-center bg-black/50 backdrop-blur-sm transition-all animate-in fade-in duration-300">
             <div className="w-full max-w-[480px] bg-white rounded-t-[40px] p-8 pb-12 flex flex-col items-center animate-in slide-in-from-bottom-full duration-500 shadow-2xl">
-              {/* 상단 핸들 바 */}
               <div className="w-12 h-1.5 bg-gray-200 rounded-full mb-8"></div>
               
-              {/* 체크 아이콘 */}
               <div className="w-20 h-20 bg-[#F3F6FC] rounded-full flex items-center justify-center mb-6">
                 <div className="w-10 h-10 rounded-full border-4 border-[#C7D4F4] flex items-center justify-center">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6C86D3" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
@@ -227,7 +222,6 @@ export default function ReservationPage() {
                 예약이 <span className="text-[#C7A27C]">확정되었습니다</span>
               </h2>
 
-              {/* 예약 정보 카드 */}
               <div className="w-full bg-white border border-gray-100 rounded-[25px] p-6 shadow-sm mb-10 flex flex-col items-center">
                 <span className="text-[18px] font-bold text-gray-800 mb-2">{confirmedInfo.piano_name}</span>
                 <span className="text-[16px] font-medium text-[#6C86D3]">
@@ -235,7 +229,6 @@ export default function ReservationPage() {
                 </span>
               </div>
 
-              {/* 이용 주의사항 섹션 */}
               <div className="w-full bg-[#F9FAFB] rounded-[20px] p-6 mb-8">
                 <p className="font-bold text-[15px] mb-4 flex items-center gap-2">⚠️ 이용 주의사항</p>
                 <ul className="text-[14px] text-gray-600 space-y-3 font-medium">
@@ -245,7 +238,15 @@ export default function ReservationPage() {
                 </ul>
                 <div className="mt-6 pt-4 border-t border-dashed border-gray-200 text-center">
                    <p className="text-[12px] text-gray-400 mb-1">💬 문의 : 크누피 집행부</p>
-                   <p className="text-[13px] font-bold text-[#6C86D3] underline underline-offset-4">사이소리함 (카카오톡 채팅)</p>
+                   {/* ✅ 사이소리함 클릭 시 카카오톡 오픈채팅방 이동 */}
+                   <a 
+                    href="https://open.kakao.com/o/s5DRwRei" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-[13px] font-bold text-[#6C86D3] underline underline-offset-4 hover:text-[#4A63B1] transition-colors"
+                   >
+                     사이소리함 (카카오톡 채팅)
+                   </a>
                 </div>
               </div>
 
@@ -259,7 +260,6 @@ export default function ReservationPage() {
           </div>
         )}
 
-        {/* ... (중략: 푸터 및 기타 모달 동일) ... */}
         {showMap && (
           <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-6" onClick={() => setShowMap(false)}>
             <div className="relative max-w-[400px] w-full bg-white rounded-[30px] p-2 shadow-2xl overflow-hidden">
