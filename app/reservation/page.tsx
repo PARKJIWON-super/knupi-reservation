@@ -6,7 +6,10 @@ import { supabase } from '@/lib/supabase';
 
 export default function ReservationPage() {
   const pianos = ["1번 피아노", "2번 피아노", "3번 피아노", "업라이트 피아노"];
+  // 시작 시간용 (09:00 ~ 23:30)
   const timeSlots = Array.from({ length: 30 }, (_, i) => 9 + i * 0.5);
+  // 종료 시간용 (09:30 ~ 24:00)
+  const endSlots = Array.from({ length: 31 }, (_, i) => 9 + i * 0.5).filter(t => t > 9);
 
   const [dbReservations, setDbReservations] = useState<any[]>([]);
   const [activePiano, setActivePiano] = useState<string | null>(null);
@@ -39,6 +42,11 @@ export default function ReservationPage() {
 
   useEffect(() => { fetchReservations(); }, [selectedDate]);
 
+  const formatTimeDisplay = (t: number) => {
+    if (t === 24) return "24:00";
+    return t % 1 === 0 ? `${t}:00` : `${Math.floor(t)}:30`;
+  };
+
   const handleReserve = async (pianoName: string) => {
     if (!formData.name || !formData.studentId || formData.start === null || formData.end === null) {
       return alert("모든 정보를 입력하고 시간을 선택해주세요.");
@@ -47,7 +55,6 @@ export default function ReservationPage() {
       return alert("종료 시간은 시작 시간보다 늦어야 합니다.");
     }
 
-    // ✅ 중복 예약 체크 로직 추가
     const isOverlap = dbReservations.some(res => {
       return (
         res.piano_name === pianoName &&
@@ -118,11 +125,11 @@ export default function ReservationPage() {
           </button>
         </div>
 
-        <div className="flex justify-end gap-4 mb-4 px-1">
-          <div className="flex items-center gap-1.5 text-[13px] text-gray-500 font-medium">
+        <div className="flex justify-end gap-4 mb-4 px-1 text-gray-500 font-medium">
+          <div className="flex items-center gap-1.5 text-[13px]">
             <div className="w-2 h-2 bg-[#C7D4F4]/40 rounded-full"></div> 예약 가능
           </div>
-          <div className="flex items-center gap-1.5 text-[13px] text-gray-500 font-medium">
+          <div className="flex items-center gap-1.5 text-[13px]">
             <div className="w-2 h-2 bg-[#C7D4F4] rounded-full"></div> 예약 불가
           </div>
         </div>
@@ -176,15 +183,18 @@ export default function ReservationPage() {
                         onChange={(e) => setFormData({...formData, start: e.target.value === "" ? null : Number(e.target.value)})}
                       >
                         <option value="" disabled hidden>시작 시간</option>
-                        {timeSlots.map(t => <option key={t} value={t}>{t % 1 === 0 ? `${t}:00` : `${Math.floor(t)}:30`}</option>)}
+                        {timeSlots.map(t => <option key={t} value={t}>{formatTimeDisplay(t)}</option>)}
                       </select>
+
                       <select 
                         className="w-full p-4 rounded-full bg-white text-[14px] outline-none appearance-none px-5 shadow-sm border border-transparent focus:border-[#C7D4F4]" 
                         value={formData.end ?? ""} 
                         onChange={(e) => setFormData({...formData, end: e.target.value === "" ? null : Number(e.target.value)})}
                       >
                         <option value="" disabled hidden>종료 시간</option>
-                        {timeSlots.map(t => <option key={t} value={t}>{t % 1 === 0 ? `${t}:00` : `${Math.floor(t)}:30`}</option>)}
+                        {endSlots.map(t => (
+                          <option key={t} value={t}>{formatTimeDisplay(t)}</option>
+                        ))}
                       </select>
                     </div>
                     <button 
