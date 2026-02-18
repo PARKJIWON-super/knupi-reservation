@@ -162,7 +162,7 @@ export default function Home() {
       >
         <div className="flex flex-col gap-1">
           <h1 className="text-[34px] font-bold tracking-[-0.04em] leading-tight">
-            <span className="text-[#000080]/80">Knupi Reservation</span>
+            <span className="text-[#000080]/30">Knupi Reservation</span>
           </h1>
           <p className="text-[15px] font-medium tracking-[-0.03em] text-[#7B8AB0]">크누피 연습실 예약</p>
         </div>
