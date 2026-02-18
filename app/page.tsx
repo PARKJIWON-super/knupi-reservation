@@ -182,7 +182,7 @@ export default function Home() {
           <h2 className="text-[22px] font-bold tracking-[-0.03em] text-[#1A1A1A] px-1">예약 서비스</h2>
           <div className="flex flex-col gap-[10px]">
             <Link href="/reservation">
-              <div className="flex justify-between items-center w-full h-[105px] px-[30px] bg-white/30 backdrop-blur-[20px] rounded-[20px] border border-white/20 hover:bg-white/40 shadow-sm transition-all cursor-pointer group">
+              <div className="flex justify-between items-center w-full h-[105px] px-[30px] bg-white/30 backdrop-blur-[20px] rounded-[20px] border border-white/20 hover:bg-white/60 shadow-sm transition-all cursor-pointer group">
                 <div className="flex flex-col gap-[8px]">
                   <span className="text-[20px] font-semibold leading-[24px] tracking-[-0.03em]">연습실 예약하기</span>
                   <span className="text-[16px] text-[#B2B2B2] leading-[19px] tracking-[-0.03em]">실시간 현황 확인 및 예약</span>
@@ -194,7 +194,7 @@ export default function Home() {
                 </div>
               </div>
             </Link>
-            <div onClick={() => setShowLookup(true)} className="flex justify-between items-center w-full h-[105px] px-[30px] bg-white/30 backdrop-blur-[20px] rounded-[20px] border border-white/20 hover:bg-white/40 shadow-sm cursor-pointer transition-all group">
+            <div onClick={() => setShowLookup(true)} className="flex justify-between items-center w-full h-[105px] px-[30px] bg-white/30 backdrop-blur-[20px] rounded-[20px] border border-white/20 hover:bg-white/60 shadow-sm cursor-pointer transition-all group">
               <div className="flex flex-col gap-[8px]">
                 <span className="text-[20px] font-semibold leading-[24px] tracking-[-0.03em]">내 예약 확인하기</span>
                 <span className="text-[16px] text-[#B2B2B2] leading-[19px] tracking-[-0.03em]">이름과 학번으로 조회</span>
