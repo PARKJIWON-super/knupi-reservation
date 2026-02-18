@@ -262,7 +262,7 @@ export default function Home() {
               ))}
               <li className="flex items-center gap-[10px] text-[16px] pt-2 border-t border-black/5 mt-1">
                 <div className="w-[3.7px] h-[3.7px] bg-[#808080] rounded-full shrink-0"></div>
-                <span className="text-[#333333]">문의사항 크누피 집행부 <a href="https://open.kakao.com/o/s5DRwRei" target="_blank" className="text-blue-600 font-bold underline underline-offset-4">사이소리함</a></span>
+                <span className="text-[#333333]">문의사항 크누피 집행부 <a href="https://open.kakao.com/o/s5DRwRei" target="_blank" className="#C7D4F4 font-bold underline underline-offset-4">사이소리함</a></span>
               </li>
             </ul>
           </div>
