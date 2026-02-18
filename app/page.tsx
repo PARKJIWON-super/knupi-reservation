@@ -210,11 +210,13 @@ export default function Home() {
 
         {/* 2️⃣ 피아노 배치도 */}
         <section className="flex flex-col gap-[12px] w-full">
-          <h2 className="text-[22px] font-bold tracking-[-0.03em] text-[#1A1A1A] px-1">피아노 배치도</h2>
-          <div className="w-full bg-white/50 backdrop-blur-md rounded-[25px] p-2 border border-white/20 shadow-sm overflow-hidden flex justify-center items-center">
-            <img src="/piano-layout.png" alt="피아노 배치도" className="w-full h-auto max-w-[480px] rounded-[20px]" />
-          </div>
-        </section>
+  <h2 className="text-[22px] font-bold tracking-[-0.03em] text-[#1A1A1A] px-1">피아노 배치도</h2>
+  {/* p-2 제거, overflow-hidden 유지 */}
+  <div className="w-full bg-white/50 backdrop-blur-md rounded-[25px] border border-white/20 shadow-sm overflow-hidden flex justify-center items-center">
+    {/* rounded-[20px] 제거 (부모의 overflow-hidden이 깎아줌) */}
+    <img src="/piano-layout.png" alt="피아노 배치도" className="w-full h-auto max-w-[480px]" />
+  </div>
+</section>
 
         {/* 3️⃣ 이달의 랭킹 TOP 3 */}
         <section className="flex flex-col gap-[12px]">
