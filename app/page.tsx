@@ -163,7 +163,7 @@ export default function Home() {
         <div className="flex flex-col gap-1">
           <h1 className="text-[34px] font-bold tracking-[-0.04em] leading-tight">
   {/* multiply 모드는 배경과 색을 곱하여 더 깊은 색감을 만듭니다 */}
-  <span className="text-[#000080] mix-blend-multiply opacity-80">
+  <span className="text-[#000080] mix-blend-multiply opacity-60">
     Knupi Reservation
   </span>
 </h1>
