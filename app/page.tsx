@@ -225,19 +225,25 @@ export default function Home() {
             {rankings[1] && (
               <div className="flex-1 bg-[#C7D4F4]/55 border border-[#B9C8ED] rounded-[5px] flex flex-col items-center justify-center py-2 transition-all" style={{ height: '73.11px' }}>
                 <span className="text-[16px] font-semibold text-[#808080] tracking-[-0.03em]">{rankings[1].name}</span>
-                <span className="text-[14px] text-[#808080]">{rankings[1].total}시간</span>
+                <span className="text-[14px] text-[#808080]">
+  <span className="font-bold">{rankings[1].total}</span>시간
+</span>
               </div>
             )}
             {rankings[0] && (
               <div className="flex-1 bg-[#C7D4F4] border border-[#B9C8ED] rounded-[5px] flex flex-col items-center justify-center py-2 shadow-lg relative" style={{ height: '131px' }}>
                 <span className="text-[16px] font-semibold text-black tracking-[-0.03em]">{rankings[0].name}</span>
-                <span className="text-[14px]  text-black">{rankings[0].total}시간</span>
+                <span className="text-[14px] text-black">
+  <span className="font-bold">{rankings[0].total}</span>시간
+</span>
               </div>
             )}
             {rankings[2] && (
               <div className="flex-1 bg-[#C7D4F4]/55 border border-[#B9C8ED] rounded-[5px] flex flex-col items-center justify-center py-2 transition-all" style={{ height: '46px' }}>
                 <span className="text-[16px] font-semibold text-[#808080] tracking-[-0.03em]">{rankings[2].name}</span>
-                <span className="text-[14px]  text-[#808080]">{rankings[2].total}시간</span>
+                <span className="text-[14px] text-[#808080]">
+  <span className="font-bold">{rankings[2].total}</span>시간
+</span>
               </div>
             )}
           </div>
