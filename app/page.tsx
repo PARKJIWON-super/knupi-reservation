@@ -89,57 +89,53 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-[#F9FAFB] font-['Pretendard'] text-[#1A1A1A] flex flex-col items-center overflow-x-hidden relative">
       
-      {/* 🚀 모달 레이어: showLookup이 true일 때만 표시 */}
       {showLookup && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center px-[20px]">
-          {/* 뒷배경 어둡게 처리 및 클릭 시 닫기 */}
+        <div className="fixed inset-0 z-[100] flex items-center justify-center px-[20px] font-['Pretendard']">
           <div 
             className="absolute inset-0 bg-black/40 backdrop-blur-sm" 
             onClick={() => { setShowLookup(false); setMyReservations([]); }}
           />
           
-          {/* 모달 박스 */}
-          <div className="relative w-full max-w-[400px] bg-white rounded-[32px] p-8 shadow-2xl animate-in zoom-in-95 duration-200">
+          <div className="relative w-full max-w-[400px] bg-white rounded-[32px] p-8 shadow-2xl animate-in zoom-in-95 duration-200 font-['Pretendard']">
             <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-6" />
             
-            <h3 className="text-[20px] font-bold text-center mb-8 tracking-[-0.03em]">조회 정보를 입력하세요</h3>
+            <h3 className="text-[20px] text-center mb-8 tracking-[-0.03em]">조회 정보를 입력하세요</h3>
             
             <div className="flex flex-col gap-3">
               <input 
                 type="text" 
                 placeholder="이름" 
-                className="w-full p-4 rounded-[16px] bg-[#F3F4F6] border-0 text-[15px] outline-none focus:ring-2 ring-blue-100 transition-all" 
+                className="w-full p-4 rounded-[16px] bg-[#F3F4F6] border-0 text-[15px] outline-none focus:ring-2 ring-blue-100 transition-all font-['Pretendard']" 
                 onChange={(e) => setInfo({...info, name: e.target.value})} 
               />
               <input 
                 type="text" 
                 placeholder="학번" 
-                className="w-full p-4 rounded-[16px] bg-[#F3F4F6] border-0 text-[15px] outline-none focus:ring-2 ring-blue-100 transition-all" 
+                className="w-full p-4 rounded-[16px] bg-[#F3F4F6] border-0 text-[15px] outline-none focus:ring-2 ring-blue-100 transition-all font-['Pretendard']" 
                 onChange={(e) => setInfo({...info, studentId: e.target.value})} 
               />
               <button 
                 onClick={handleSearch} 
                 disabled={isSearching} 
-                className="w-full bg-[#C7D4F4] text-[#4A5568] font-bold py-4 rounded-[16px] text-[16px] mt-2 active:scale-95 transition-all shadow-sm"
+                className="w-full bg-[#C7D4F4] text-[#4A5568] py-4 rounded-[16px] text-[16px] mt-2 active:scale-95 transition-all shadow-sm font-['Pretendard']"
               >
                 {isSearching ? '조회 중...' : '조회하기'}
               </button>
             </div>
 
-            {/* 예약 결과 리스트 */}
             {myReservations.length > 0 && (
               <div className="mt-6 max-h-[250px] overflow-y-auto flex flex-col gap-3 pr-1 custom-scrollbar">
                 {myReservations.map((res) => (
-                  <div key={res.id} className="bg-white p-4 rounded-[16px] shadow-sm flex justify-between items-center border border-gray-100">
+                  <div key={res.id} className="bg-white p-4 rounded-[16px] shadow-sm flex justify-between items-center border border-gray-100 font-['Pretendard']">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[11px] font-bold text-blue-600">{res.piano_name}</span>
+                        <span className="text-[11px] text-blue-600">{res.piano_name}</span>
                         {isAdmin && <span className="text-[10px] bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded-md">예약자: {res.user_name}</span>}
                       </div>
-                      <p className="text-[14px] font-bold">{res.data}</p>
+                      <p className="text-[14px]">{res.data}</p>
                       <p className="text-[12px] text-gray-400">{formatTime(res.start_time)} - {formatTime(res.end_time)}</p>
                     </div>
-                    <button onClick={() => handleDelete(res.id)} className="text-red-500 text-[13px] font-bold px-3 py-2 hover:bg-red-50 rounded-xl transition-colors">취소</button>
+                    <button onClick={() => handleDelete(res.id)} className="text-red-500 text-[13px] px-3 py-2 hover:bg-red-50 rounded-xl transition-colors font-['Pretendard']">취소</button>
                   </div>
                 ))}
               </div>
@@ -147,7 +143,7 @@ export default function Home() {
             
             <button 
               onClick={() => { setShowLookup(false); setMyReservations([]); }}
-              className="mt-6 w-full text-gray-400 text-[14px] font-medium hover:text-gray-600 transition-colors"
+              className="mt-6 w-full text-gray-400 text-[14px] font-medium hover:text-gray-600 transition-colors font-['Pretendard']"
             >
               닫기
             </button>
@@ -155,36 +151,29 @@ export default function Home() {
         </div>
       )}
 
-      {/* 상단 헤더 */}
       <div 
         className="w-full max-w-[480px] pt-[75px] pb-[340px] px-[24px] rounded-b-[15px] relative"
         style={{ background: 'radial-gradient(137.53% 99.23% at 92.41% 7.26%, #FFF5E4 0%, #C7D4F4 100%)' }}
       >
         <div className="flex flex-col gap-1">
-  <h1 className="text-[34px] font-bold tracking-[-0.04em] leading-tight">
-    {/* - mix-blend-multiply: 배경과 색을 곱함
-        - opacity-75: 배경색이 글자를 통해 살짝 올라옴
-        - contrast-125: 글자와 배경의 경계를 자연스럽게 조정
-    */}
-    <span className="text-[#1A237E] mix-blend-multiply opacity-75 filter contrast-125">
-      Knupi Reservation
-    </span>
-  </h1>
-          <p className="text-[15px] font-medium tracking-[-0.03em] text-[#7B8AB0]">크누피 연습실 예약</p>
+          <h1 className="text-[34px] tracking-[-0.04em] leading-tight font-['Pretendard']">
+            <span className="text-[#1A237E] mix-blend-multiply opacity-75 filter contrast-125">
+              Knupi Reservation
+            </span>
+          </h1>
+          <p className="text-[15px] font-medium tracking-[-0.03em] text-[#7B8AB0] font-['Pretendard']">크누피 연습실 예약</p>
         </div>
       </div>
 
-      {/* 컨텐츠 영역 */}
       <div className="w-full max-w-[480px] -mt-[300px] px-[20px] flex flex-col gap-[65px] pb-[80px] relative z-10 font-['Pretendard']">
         
-        {/* 1️⃣ 예약 서비스 */}
         <section className="flex flex-col gap-[12px]">
-          <h2 className="text-[22px] font-bold tracking-[-0.03em] text-[#1A1A1A] px-1">예약 서비스</h2>
+          <h2 className="text-[22px] tracking-[-0.03em] text-[#1A1A1A] px-1 font-['Pretendard']">예약 서비스</h2>
           <div className="flex flex-col gap-[10px]">
             <Link href="/reservation">
-              <div className="flex justify-between items-center w-full h-[105px] px-[30px] bg-white/30 backdrop-blur-[20px] rounded-[20px] border border-white/20 hover:bg-white/60 shadow-sm transition-all cursor-pointer group">
+              <div className="flex justify-between items-center w-full h-[105px] px-[30px] bg-white/30 backdrop-blur-[20px] rounded-[20px] border border-white/20 hover:bg-white/60 shadow-sm transition-all cursor-pointer group font-['Pretendard']">
                 <div className="flex flex-col gap-[8px]">
-                  <span className="text-[20px] font-semibold leading-[24px] tracking-[-0.03em]">연습실 예약하기</span>
+                  <span className="text-[20px] leading-[24px] tracking-[-0.03em]">연습실 예약하기</span>
                   <span className="text-[16px] text-[#B2B2B2] leading-[19px] tracking-[-0.03em]">실시간 현황 확인 및 예약</span>
                 </div>
                 <div className="w-[32px] h-[32px] flex items-center justify-center transition-transform group-hover:translate-x-1">
@@ -194,9 +183,9 @@ export default function Home() {
                 </div>
               </div>
             </Link>
-            <div onClick={() => setShowLookup(true)} className="flex justify-between items-center w-full h-[105px] px-[30px] bg-white/30 backdrop-blur-[20px] rounded-[20px] border border-white/20 hover:bg-white/60 shadow-sm cursor-pointer transition-all group">
+            <div onClick={() => setShowLookup(true)} className="flex justify-between items-center w-full h-[105px] px-[30px] bg-white/30 backdrop-blur-[20px] rounded-[20px] border border-white/20 hover:bg-white/60 shadow-sm cursor-pointer transition-all group font-['Pretendard']">
               <div className="flex flex-col gap-[8px]">
-                <span className="text-[20px] font-semibold leading-[24px] tracking-[-0.03em]">내 예약 확인하기</span>
+                <span className="text-[20px] leading-[24px] tracking-[-0.03em]">내 예약 확인하기</span>
                 <span className="text-[16px] text-[#B2B2B2] leading-[19px] tracking-[-0.03em]">이름과 학번으로 조회</span>
               </div>
               <div className="w-[32px] h-[32px] flex items-center justify-center transition-transform group-hover:translate-x-1">
@@ -208,62 +197,56 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 2️⃣ 피아노 배치도 */}
         <section className="flex flex-col gap-[12px] w-full">
-  <h2 className="text-[22px] font-bold tracking-[-0.03em] text-[#1A1A1A] px-1">피아노 배치도</h2>
-  {/* p-2 제거, overflow-hidden 유지 */}
-  <div className="w-full bg-white/50 backdrop-blur-md rounded-[25px] border border-white/20 shadow-sm overflow-hidden flex justify-center items-center">
-    {/* rounded-[20px] 제거 (부모의 overflow-hidden이 깎아줌) */}
-    <img src="/piano-layout.png" alt="피아노 배치도" className="w-full h-auto max-w-[480px]" />
-  </div>
-</section>
+          <h2 className="text-[22px] tracking-[-0.03em] text-[#1A1A1A] px-1 font-['Pretendard']">피아노 배치도</h2>
+          <div className="w-full bg-white/50 backdrop-blur-md rounded-[25px] border border-white/20 shadow-sm overflow-hidden flex justify-center items-center">
+            <img src="/piano-layout.png" alt="피아노 배치도" className="w-full h-auto max-w-[480px]" />
+          </div>
+        </section>
 
-        {/* 3️⃣ 이달의 랭킹 TOP 3 */}
         <section className="flex flex-col gap-[12px]">
-          <h2 className="text-[22px] font-bold tracking-[-0.03em] text-[#1A1A1A] px-1">{currentMonth}월의 랭킹 TOP 3</h2>
-          <div className="w-full h-[181px] bg-white/20 backdrop-blur-lg rounded-[20px] flex items-end justify-center px-[60px] pb-[20px] gap-[10px] border border-white/20 shadow-sm">
+          <h2 className="text-[22px] tracking-[-0.03em] text-[#1A1A1A] px-1 font-['Pretendard']">{currentMonth}월의 랭킹 TOP 3</h2>
+          <div className="w-full h-[181px] bg-white/20 backdrop-blur-lg rounded-[20px] flex items-end justify-center px-[60px] pb-[20px] gap-[10px] border border-white/20 shadow-sm font-['Pretendard']">
             {rankings[1] && (
               <div className="flex-1 bg-[#C7D4F4]/55 border border-[#B9C8ED] rounded-[5px] flex flex-col items-center justify-center py-2 transition-all" style={{ height: '73.11px' }}>
-                <span className="text-[16px] font-semibold text-[#808080] tracking-[-0.03em]">{rankings[1].name}</span>
-                <span className="text-[14px] font-semibold text-[#808080]">{rankings[1].total}시간</span>
+                <span className="text-[16px] text-[#808080] tracking-[-0.03em]">{rankings[1].name}</span>
+                <span className="text-[14px] text-[#808080]">{rankings[1].total}시간</span>
               </div>
             )}
             {rankings[0] && (
               <div className="flex-1 bg-[#C7D4F4] border border-[#B9C8ED] rounded-[5px] flex flex-col items-center justify-center py-2 shadow-lg relative" style={{ height: '131px' }}>
-                <span className="text-[16px] font-semibold text-black tracking-[-0.03em]">{rankings[0].name}</span>
-                <span className="text-[14px] font-semibold text-black">{rankings[0].total}시간</span>
+                <span className="text-[16px] text-black tracking-[-0.03em]">{rankings[0].name}</span>
+                <span className="text-[14px] text-black">{rankings[0].total}시간</span>
               </div>
             )}
             {rankings[2] && (
               <div className="flex-1 bg-[#C7D4F4]/55 border border-[#B9C8ED] rounded-[5px] flex flex-col items-center justify-center py-2 transition-all" style={{ height: '46px' }}>
-                <span className="text-[16px] font-semibold text-[#808080] tracking-[-0.03em]">{rankings[2].name}</span>
-                <span className="text-[14px] font-semibold text-[#808080]">{rankings[2].total}시간</span>
+                <span className="text-[16px] text-[#808080] tracking-[-0.03em]">{rankings[2].name}</span>
+                <span className="text-[14px] text-[#808080]">{rankings[2].total}시간</span>
               </div>
             )}
           </div>
         </section>
 
-        {/* 4️⃣ 이용 주의사항 */}
         <section className="flex flex-col gap-[12px]">
-          <h2 className="text-[22px] font-bold tracking-[-0.03em] text-[#1A1A1A] px-1">이용 주의사항</h2>
-          <div className="w-full min-h-[161px] p-[18px_25px] bg-white/30 rounded-[20px] backdrop-blur-md border border-white/20 shadow-sm">
+          <h2 className="text-[22px] tracking-[-0.03em] text-[#1A1A1A] px-1 font-['Pretendard']">이용 주의사항</h2>
+          <div className="w-full min-h-[161px] p-[18px_25px] bg-white/30 rounded-[20px] backdrop-blur-md border border-white/20 shadow-sm font-['Pretendard']">
             <ul className="flex flex-col gap-[12px]">
               {['음식물 반입 금지 및 뒷정리 필수', '노쇼 시 향후 이용이 제한될 수 있음', '부정 정보 예약 시 강제 취소 가능'].map((text, i) => (
-                <li key={i} className="flex items-center gap-[10px] text-[16px] text-[#333333] tracking-[-0.03em] leading-[15px]">
+                <li key={i} className="flex items-center gap-[10px] text-[16px] text-[#333333] tracking-[-0.03em] leading-[15px] font-['Pretendard']">
                   <div className="w-[3.7px] h-[3.7px] bg-[#808080] rounded-full shrink-0"></div>
                   <span>{text}</span>
                 </li>
               ))}
-              <li className="flex items-center gap-[10px] text-[16px] pt-2 border-t border-black/5 mt-1">
+              <li className="flex items-center gap-[10px] text-[16px] pt-2 border-t border-black/5 mt-1 font-['Pretendard']">
                 <div className="w-[3.7px] h-[3.7px] bg-[#808080] rounded-full shrink-0"></div>
-                <span className="text-[#333333]">문의사항 크누피 집행부 <a href="https://open.kakao.com/o/s5DRwRei" target="_blank" className="text-blue-600 font-bold underline underline-offset-4">사이소리함</a></span>
+                <span className="text-[#333333]">문의사항 크누피 집행부 <a href="https://open.kakao.com/o/s5DRwRei" target="_blank" className="text-blue-600 underline underline-offset-4">사이소리함</a></span>
               </li>
             </ul>
           </div>
         </section>
 
-        {/* 푸터 */}
-        <footer className="text-center pt-[10px] pb-[30px]">
+        <footer className="text-center pt-[10px] pb-[30px] font-['Pretendard']">
           <p className="text-[12px] font-light tracking-[0.04em] text-[#999999]">
             © KYUNGPOOK NATIONAL UNIV. PIANO CLUB KNUPI
           </p>
