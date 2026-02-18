@@ -160,13 +160,16 @@ export default function Home() {
         className="w-full max-w-[480px] pt-[75px] pb-[340px] px-[24px] rounded-b-[15px] relative"
         style={{ background: 'radial-gradient(137.53% 99.23% at 92.41% 7.26%, #FFF5E4 0%, #C7D4F4 100%)' }}
       >
-        <div className="flex flex-col gap-2">
-        {/* 영문 메인 타이틀: 자간을 좁게(-0.05em) 설정해 이미지와 비슷한 밀도감을 줬습니다 */}
-        <h1 className="text-[42px] font-black tracking-[-0.05em] leading-[1.1]">
-          <span className="text-[#000080] mix-blend-multiply opacity-90">
-            Knupi Reservation
-          </span>
-        </h1>
+        <div className="flex flex-col gap-1">
+  <h1 className="text-[34px] font-bold tracking-[-0.04em] leading-tight">
+    {/* - mix-blend-multiply: 배경과 색을 곱함
+        - opacity-75: 배경색이 글자를 통해 살짝 올라옴
+        - contrast-125: 글자와 배경의 경계를 자연스럽게 조정
+    */}
+    <span className="text-[#1A237E] mix-blend-multiply opacity-75 filter contrast-125">
+      Knupi Reservation
+    </span>
+  </h1>
           <p className="text-[15px] font-medium tracking-[-0.03em] text-[#7B8AB0]">크누피 연습실 예약</p>
         </div>
       </div>
