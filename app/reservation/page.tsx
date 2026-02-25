@@ -137,7 +137,19 @@ export default function ReservationPage() {
         <div className="flex justify-start mb-8 mt-4">
           <button onClick={() => setShowMap(true)}
             className="flex items-center gap-2 bg-[#C7D4F4] px-5 py-2 rounded-full shadow-sm font-bold text-[15px]">
-            피아노 배치도
+            피아노 배치도 <svg 
+    width="24" 
+    height="24" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    xmlns="http://www.w3.org/2000/svg"
+    className="inline-block"
+  >
+    <path 
+      d="M7 10L12 15L17 10H7Z" 
+      fill="#1C1B1F" 
+    />
+  </svg>
           </button>
         </div>
 
