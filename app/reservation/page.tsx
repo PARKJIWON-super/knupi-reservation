@@ -122,7 +122,12 @@ export default function ReservationPage() {
         <div className="flex gap-7 overflow-x-auto pb-6 scrollbar-hide px-1">
           {dates.map((d) => (
             <button key={d.fullDate} onClick={() => { setSelectedDate(d.fullDate); setTooltip(null); }}
-              className={`flex flex-col items-center min-w-[35px] transition-all ${selectedDate === d.fullDate ? 'bg-white/45 p-[10px_6px] rounded-[8px] -mt-[10px] shadow-sm' : ''}`}>
+              className={`flex flex-col items-center min-w-[35px] transition-all ${
+        selectedDate === d.fullDate 
+        ? 'bg-white/45 p-[10px_6px] rounded-[8px] -mt-[10px] shadow-sm' 
+        : ''
+      }`}
+    >
               <span className={`text-[20px] font-bold ${selectedDate === d.fullDate ? 'text-black' : 'text-[#808080]'}`}>{d.dayNum}</span>
               <span className={`text-[14px] font-semibold ${selectedDate === d.fullDate ? 'text-[#666666]' : 'text-[#B2B2B2]'}`}>{d.dayName}</span>
             </button>
