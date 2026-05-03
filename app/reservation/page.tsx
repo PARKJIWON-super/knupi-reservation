@@ -4,18 +4,40 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
+type Reservation = {
+  id?: number;
+  user_name: string;
+  student_id: string;
+  piano_name: string;
+  data: string;
+  start_time: number;
+  end_time: number;
+};
+
+const isDuplicateReservationError = (error: { code?: string; message?: string } | null) => {
+  if (!error) return false;
+
+  return (
+    error.code === '23P01' ||
+    error.code === '23505' ||
+    error.message?.toLowerCase().includes('no_overlapping_reservations') ||
+    error.message?.toLowerCase().includes('conflicting key value violates exclusion constraint')
+  );
+};
+
 export default function ReservationPage() {
   const pianos = ["1번 피아노", "2번 피아노", "3번 피아노", "업라이트 피아노"];
   const timeSlots = Array.from({ length: 30 }, (_, i) => 9 + i * 0.5);
   const endSlots = Array.from({ length: 31 }, (_, i) => 9 + i * 0.5).filter(t => t > 9);
 
-  const [dbReservations, setDbReservations] = useState<any[]>([]);
+  const [dbReservations, setDbReservations] = useState<Reservation[]>([]);
   const [activePiano, setActivePiano] = useState<string | null>(null);
   const [showMap, setShowMap] = useState(false);
   const [tooltip, setTooltip] = useState<{ piano: string; time: number; name: string } | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [confirmedInfo, setConfirmedInfo] = useState<any>(null);
+  const [confirmedInfo, setConfirmedInfo] = useState<Reservation | null>(null);
 
   const dates = Array.from({ length: 14 }, (_, i) => {
     const d = new Date();
@@ -42,7 +64,20 @@ export default function ReservationPage() {
     setDbReservations(data || []);
   };
 
-  useEffect(() => { fetchReservations(); }, [selectedDate]);
+  useEffect(() => { 
+    fetchReservations(); 
+
+    const channel = supabase
+      .channel('public:reservations_calendar')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'reservations' }, () => {
+        fetchReservations();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [selectedDate]);
 
   const formatTimeDisplay = (t: number) => {
     if (t === 24) return "24:00";
@@ -50,6 +85,8 @@ export default function ReservationPage() {
   };
 
   const handleReserve = async (pianoName: string) => {
+    if (isSubmitting) return;
+
     if (!formData.name || !formData.studentId || formData.start === null || formData.end === null) {
       return alert("모든 정보를 입력하고 시간을 선택해주세요.");
     }
@@ -60,20 +97,29 @@ export default function ReservationPage() {
       return alert("종료 시간은 시작 시간보다 늦어야 합니다.");
     }
 
-    const isOverlap = dbReservations.some(res => {
-      return (
-        res.piano_name === pianoName &&
-        String(res.data) === String(selectedDate) &&
-        formData.start! < res.end_time && 
-        formData.end! > res.start_time
-      );
-    });
+    setIsSubmitting(true);
 
-    if (isOverlap) {
-      return alert("❌ 죄송합니다. 선택하신 시간대에 이미 예약이 존재합니다.");
+    // 빠른 안내를 위한 사전 검사입니다. 실제 동시 예약 방지는 DB 제약 조건이 최종적으로 처리합니다.
+    const { data: latestReservations, error: latestReservationsError } = await supabase
+      .from('reservations')
+      .select('start_time, end_time')
+      .eq('piano_name', pianoName)
+      .eq('data', selectedDate)
+      .lt('start_time', formData.end)
+      .gt('end_time', formData.start);
+
+    if (latestReservationsError) {
+      setIsSubmitting(false);
+      return alert("예약 정보를 확인하는 중 오류가 발생했습니다. 다시 시도해주세요.");
     }
 
-    const reservationData = { 
+    if ((latestReservations || []).length > 0) {
+      await fetchReservations();
+      setIsSubmitting(false);
+      return alert("❌ 이미 예약된 시간입니다. 다른 시간을 선택해주세요.");
+    }
+
+    const reservationData: Reservation = { 
       user_name: formData.name, 
       student_id: formData.studentId, 
       piano_name: pianoName, 
@@ -89,10 +135,15 @@ export default function ReservationPage() {
       setShowSuccessModal(true);
       setActivePiano(null); 
       setFormData({ name: '', studentId: '', start: null, end: null });
-      fetchReservations(); 
+      await fetchReservations(); 
+    } else if (isDuplicateReservationError(error)) {
+      await fetchReservations();
+      alert("❌ 죄송합니다. 방금 다른 사용자가 같은 시간대를 먼저 예약했습니다. 다른 시간을 선택해주세요.");
     } else {
       alert("예약에 실패했습니다. 다시 시도해주세요.");
     }
+
+    setIsSubmitting(false);
   };
 
   const currentDisplayDate = dates.find(d => d.fullDate === selectedDate) || dates[0];
@@ -122,9 +173,9 @@ export default function ReservationPage() {
         <div className="flex gap-7 overflow-x-auto pb-6 scrollbar-hide px-1">
           {dates.map((d) => (
             <button key={d.fullDate} onClick={() => { setSelectedDate(d.fullDate); setTooltip(null); }}
-              className={`flex flex-col items-center min-w-[35px] transition-all ${
+              className={`flex flex-col items-center min-w-[35px] p-[10px_6px] rounded-[12px] ${
         selectedDate === d.fullDate 
-        ? 'bg-white/45 p-[10px_6px] rounded-[8px] -mt-[10px] shadow-sm' 
+        ? 'bg-white/45 shadow-sm' 
         : ''
       }`}
     >
@@ -200,20 +251,26 @@ export default function ReservationPage() {
                 {isOpen && (
                   <div className="px-6 pb-8 pt-4 bg-[#F3F6FC] flex flex-col gap-4 animate-in fade-in duration-300">
                     <div className="grid grid-cols-2 gap-3">
-                      <input type="text" placeholder="이름" value={formData.name} className="w-full p-4 rounded-full bg-white text-[14px] outline-none shadow-sm" onChange={(e) => setFormData({...formData, name: e.target.value})} />
-                      <input type="text" placeholder="학번" maxLength={10} value={formData.studentId} className="w-full p-4 rounded-full bg-white text-[14px] outline-none shadow-sm" onChange={(e) => setFormData({...formData, studentId: e.target.value})} />
+                      <input type="text" placeholder="이름" value={formData.name} className="w-full p-4 rounded-full bg-white text-[14px] text-black outline-none shadow-sm placeholder:text-gray-400" onChange={(e) => setFormData({...formData, name: e.target.value})} />
+                      <input type="text" placeholder="학번" maxLength={10} value={formData.studentId} className="w-full p-4 rounded-full bg-white text-[14px] text-black outline-none shadow-sm placeholder:text-gray-400" onChange={(e) => setFormData({...formData, studentId: e.target.value})} />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
-                      <select className="w-full p-4 rounded-full bg-white text-[14px] outline-none appearance-none px-5" value={formData.start ?? ""} onChange={(e) => setFormData({...formData, start: e.target.value === "" ? null : Number(e.target.value)})}>
+                      <select className={`w-full p-4 rounded-full bg-white text-[14px] outline-none appearance-none px-5 ${formData.start === null ? 'text-gray-400' : 'text-black'}`} value={formData.start ?? ""} onChange={(e) => setFormData({...formData, start: e.target.value === "" ? null : Number(e.target.value)})}>
                         <option value="" disabled hidden>시작 시간</option>
                         {timeSlots.map(t => <option key={t} value={t}>{formatTimeDisplay(t)}</option>)}
                       </select>
-                      <select className="w-full p-4 rounded-full bg-white text-[14px] outline-none appearance-none px-5" value={formData.end ?? ""} onChange={(e) => setFormData({...formData, end: e.target.value === "" ? null : Number(e.target.value)})}>
+                      <select className={`w-full p-4 rounded-full bg-white text-[14px] outline-none appearance-none px-5 ${formData.end === null ? 'text-gray-400' : 'text-black'}`} value={formData.end ?? ""} onChange={(e) => setFormData({...formData, end: e.target.value === "" ? null : Number(e.target.value)})}>
                         <option value="" disabled hidden>종료 시간</option>
                         {endSlots.map(t => <option key={t} value={t}>{formatTimeDisplay(t)}</option>)}
                       </select>
                     </div>
-                    <button onClick={() => handleReserve(piano)} className="w-full bg-[#C7D4F4] text-black font-bold py-4 rounded-[18px] mt-2 shadow-md active:scale-95 transition-all text-[16px]">예약 신청하기</button>
+                    <button
+                      onClick={() => handleReserve(piano)}
+                      disabled={isSubmitting}
+                      className="w-full bg-[#C7D4F4] text-black font-bold py-4 rounded-[18px] mt-2 shadow-md active:scale-95 transition-all text-[16px] disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                      {isSubmitting ? '예약 확인 중...' : '예약 신청하기'}
+                    </button>
                   </div>
                 )}
               </div>
@@ -223,38 +280,37 @@ export default function ReservationPage() {
 
         {/* ✅ 예약 확정 성공 모달 - #FFF5E4와 #C7D4F4가 섞인 배경 적용 */}
         {showSuccessModal && confirmedInfo && (
-          <div className="fixed inset-0 z-[200] flex items-end justify-center bg-black/50 backdrop-blur-sm transition-all animate-in fade-in duration-300">
+          <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 px-4 py-4 backdrop-blur-sm transition-all animate-in fade-in duration-300">
             <div 
-              className="w-full max-w-[480px] rounded-t-[40px] p-8 pb-12 flex flex-col items-center animate-in slide-in-from-bottom-full duration-500 shadow-2xl relative"
+              className="relative flex w-full max-w-[430px] flex-col items-center rounded-[34px] p-6 shadow-2xl animate-in zoom-in-95 slide-in-from-bottom-4 duration-300"
               style={{ background: 'linear-gradient(135deg, #FFF5E4 0%, #C7D4F4 100%)' }}
             >
-              <div className="w-12 h-1.5 bg-black/10 rounded-full mb-8"></div>
+              <div className="w-10 h-1.5 bg-black/10 rounded-full mb-5"></div>
               
-              <div className="w-20 h-20 bg-white/80 rounded-full flex items-center justify-center mb-6 shadow-sm">
-                <div className="w-10 h-10 rounded-full border-4 border-[#A5BBEF] flex items-center justify-center">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6C86D3" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <div className="w-16 h-16 bg-white/80 rounded-full flex items-center justify-center mb-4 shadow-sm">
+                <div className="w-9 h-9 rounded-full border-4 border-[#A5BBEF] flex items-center justify-center">
+                  <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#6C86D3" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                 </div>
               </div>
 
-              <h2 className="text-[26px] font-bold mb-8 text-black tracking-tight">
+              <h2 className="text-[23px] font-bold mb-5 text-black tracking-tight">
                 예약이 <span className="text-[#C7A27C]">확정되었습니다</span>
               </h2>
 
-              <div className="w-full bg-white/90 rounded-[25px] p-6 shadow-sm mb-10 flex flex-col items-center">
+              <div className="w-full bg-white/90 rounded-[22px] p-5 shadow-sm mb-5 flex flex-col items-center">
                 <span className="text-[18px] font-bold text-gray-800 mb-2">{confirmedInfo.piano_name}</span>
                 <span className="text-[16px] font-medium text-[#6C86D3]">
                   {confirmedInfo.data.replace(/-/g, '.')} <span className="text-gray-900 ml-1">{formatTimeDisplay(confirmedInfo.start_time)}~{formatTimeDisplay(confirmedInfo.end_time)}</span>
                 </span>
               </div>
 
-              <div className="w-full bg-white/60 rounded-[20px] p-6 mb-8 border border-white/20">
-                <p className="font-bold text-[15px] mb-4 flex items-center gap-2 text-black">⚠️ 이용 주의사항</p>
-                <ul className="text-[14px] text-gray-700 space-y-3 font-medium">
-                  <li className="flex items-center gap-2">• 음식물 반입 금지 🚫</li>
-                  <li className="flex items-center gap-2">• 뒷정리 필수 ‼️</li>
+              <div className="w-full bg-white/60 rounded-[18px] p-5 mb-5 border border-white/20">
+                <p className="font-bold text-[14px] mb-3 flex items-center gap-2 text-black">⚠️ 이용 주의사항</p>
+                <ul className="text-[13px] text-gray-700 space-y-2 font-medium">
+                  <li className="flex items-center gap-2">• 음식물 섭취 후 뒷정리 필수 ‼️</li>
                   <li className="flex items-center gap-2">• 노쇼 시 향후 이용이 제한될 수 있습니다. 😔</li>
                 </ul>
-                <div className="mt-6 pt-4 border-t border-dashed border-black/10 text-center">
+                <div className="mt-4 pt-3 border-t border-dashed border-black/10 text-center">
                    <p className="text-[12px] text-gray-500 mb-1">💬 문의 : 크누피 집행부</p>
                    <a 
                     href="https://open.kakao.com/o/s5DRwRei" 
@@ -269,7 +325,7 @@ export default function ReservationPage() {
 
               <button 
                 onClick={() => setShowSuccessModal(false)}
-                className="w-full bg-[#1A1A1A] text-white font-bold py-5 rounded-[20px] text-[16px] shadow-lg active:scale-95 transition-all"
+                className="w-full bg-[#1A1A1A] text-white font-bold py-4 rounded-[18px] text-[16px] shadow-lg active:scale-95 transition-all"
               >
                 확인
               </button>
