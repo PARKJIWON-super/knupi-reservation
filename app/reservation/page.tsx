@@ -42,7 +42,20 @@ export default function ReservationPage() {
     setDbReservations(data || []);
   };
 
-  useEffect(() => { fetchReservations(); }, [selectedDate]);
+  useEffect(() => { 
+    fetchReservations(); 
+
+    const channel = supabase
+      .channel('public:reservations_calendar')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'reservations' }, () => {
+        fetchReservations();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [selectedDate]);
 
   const formatTimeDisplay = (t: number) => {
     if (t === 24) return "24:00";

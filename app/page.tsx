@@ -47,13 +47,26 @@ export default function Home() {
           total: item.total 
         }))
         .sort((a, b) => b.total - a.total)
-        .slice(0, 3);
+        .slice(0, 10);
 
       setRankings(sorted);
     }
   };
 
-  useEffect(() => { fetchRankings(); }, []);
+  useEffect(() => { 
+    fetchRankings(); 
+    
+    const channel = supabase
+      .channel('public:reservations_rankings')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'reservations' }, () => {
+        fetchRankings();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   const handleSearch = async () => {
     if (!info.name || !info.studentId) { alert("이름과 학번을 입력해주세요."); return; }
@@ -218,11 +231,12 @@ export default function Home() {
   </div>
 </section>
 
-        {/* 3️⃣ 이달의 랭킹 TOP 3 */}
+        {/* 3️⃣ 이달의 랭킹 TOP 10 */}
         <section className="flex flex-col gap-[12px]">
-          <h2 className="text-[22px] font-bold tracking-[-0.03em] text-[#1A1A1A] px-1">{currentMonth}월의 랭킹 TOP 3</h2>
-          <div className="w-full h-[181px] bg-white/20 backdrop-blur-lg rounded-[20px] flex items-end justify-center px-[60px] pb-[20px] gap-[10px] border border-white/20 shadow-sm">
-            {rankings[1] && (
+          <h2 className="text-[22px] font-bold tracking-[-0.03em] text-[#1A1A1A] px-1">{currentMonth}월의 랭킹 TOP 10</h2>
+          <div className="flex flex-col gap-4">
+            <div className="w-full h-[181px] bg-white/20 backdrop-blur-lg rounded-[20px] flex items-end justify-center px-[60px] pb-[20px] gap-[10px] border border-white/20 shadow-sm">
+              {rankings[1] && (
               <div className="flex-1 bg-[#C7D4F4]/55 border border-[#B9C8ED] rounded-[5px] flex flex-col items-center justify-center py-2 transition-all" style={{ height: '73.11px' }}>
                 <span className="text-[16px] font-semibold text-[#808080] tracking-[-0.03em]">{rankings[1].name}</span>
                 <span className="text-[14px] text-[#808080]">
@@ -244,6 +258,22 @@ export default function Home() {
                 <span className="text-[14px] text-[#808080]">
   <span className="font-bold">{rankings[2].total}</span>시간
 </span>
+              </div>
+            )}
+            </div>
+
+            {/* Ranks 4-10 */}
+            {rankings.length > 3 && (
+              <div className="w-full bg-white/30 backdrop-blur-lg rounded-[20px] p-5 flex flex-col gap-3 border border-white/20 shadow-sm">
+                {rankings.slice(3).map((rank, index) => (
+                  <div key={index + 3} className="flex justify-between items-center bg-white/50 px-4 py-3 rounded-[12px] shadow-sm">
+                    <div className="flex items-center gap-3">
+                      <span className="text-[16px] font-bold text-[#6C86D3] w-[20px]">{index + 4}</span>
+                      <span className="text-[16px] font-semibold text-[#333333] tracking-[-0.03em]">{rank.name}</span>
+                    </div>
+                    <span className="text-[15px] text-[#333333]"><span className="font-bold">{rank.total}</span>시간</span>
+                  </div>
+                ))}
               </div>
             )}
           </div>
