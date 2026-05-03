@@ -251,8 +251,8 @@ export default function ReservationPage() {
                 {isOpen && (
                   <div className="px-6 pb-8 pt-4 bg-[#F3F6FC] flex flex-col gap-4 animate-in fade-in duration-300">
                     <div className="grid grid-cols-2 gap-3">
-                      <input type="text" placeholder="이름" value={formData.name} className="w-full p-4 rounded-full bg-white text-[14px] outline-none shadow-sm" onChange={(e) => setFormData({...formData, name: e.target.value})} />
-                      <input type="text" placeholder="학번" maxLength={10} value={formData.studentId} className="w-full p-4 rounded-full bg-white text-[14px] outline-none shadow-sm" onChange={(e) => setFormData({...formData, studentId: e.target.value})} />
+                      <input type="text" placeholder="이름" value={formData.name} className="w-full p-4 rounded-full bg-white text-[14px] text-black outline-none shadow-sm placeholder:text-gray-400" onChange={(e) => setFormData({...formData, name: e.target.value})} />
+                      <input type="text" placeholder="학번" maxLength={10} value={formData.studentId} className="w-full p-4 rounded-full bg-white text-[14px] text-black outline-none shadow-sm placeholder:text-gray-400" onChange={(e) => setFormData({...formData, studentId: e.target.value})} />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <select className={`w-full p-4 rounded-full bg-white text-[14px] outline-none appearance-none px-5 ${formData.start === null ? 'text-gray-400' : 'text-black'}`} value={formData.start ?? ""} onChange={(e) => setFormData({...formData, start: e.target.value === "" ? null : Number(e.target.value)})}>
