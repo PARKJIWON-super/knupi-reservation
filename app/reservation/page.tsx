@@ -173,9 +173,9 @@ export default function ReservationPage() {
         <div className="flex gap-7 overflow-x-auto pb-6 scrollbar-hide px-1">
           {dates.map((d) => (
             <button key={d.fullDate} onClick={() => { setSelectedDate(d.fullDate); setTooltip(null); }}
-              className={`flex flex-col items-center min-w-[35px] ${
+              className={`flex flex-col items-center min-w-[35px] p-[10px_6px] rounded-[12px] ${
         selectedDate === d.fullDate 
-        ? 'bg-white/45 p-[10px_6px] rounded-[12px] shadow-sm' 
+        ? 'bg-white/45 shadow-sm' 
         : ''
       }`}
     >
