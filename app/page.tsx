@@ -5,11 +5,14 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
 export default function Home() {
+  const pianos = ["전체", "1번 피아노", "2번 피아노", "3번 피아노", "업라이트 피아노"];
   const [showLookup, setShowLookup] = useState(false);
   const [info, setInfo] = useState({ name: '', studentId: '' });
   const [myReservations, setMyReservations] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [adminSearchKeyword, setAdminSearchKeyword] = useState('');
+  const [adminPianoFilter, setAdminPianoFilter] = useState('전체');
   const [rankings, setRankings] = useState<{name: string, total: number}[]>([]);
   
   const currentMonth = new Date().getMonth() + 1;
@@ -23,6 +26,21 @@ export default function Home() {
   const formatPracticeHours = (hours: number) => {
     return Number.isInteger(hours) ? `${hours}시간` : `${hours.toFixed(1)}시간`;
   };
+
+  const filteredReservations = isAdmin
+    ? myReservations.filter((res) => {
+        const keyword = adminSearchKeyword.trim().toLowerCase();
+        const matchesKeyword = !keyword || [
+          res.user_name,
+          res.student_id,
+          res.piano_name,
+          res.data,
+        ].some((value) => String(value).toLowerCase().includes(keyword));
+        const matchesPiano = adminPianoFilter === '전체' || res.piano_name === adminPianoFilter;
+
+        return matchesKeyword && matchesPiano;
+      })
+    : myReservations;
 
   const fetchRankings = async () => {
     const now = new Date();
@@ -75,12 +93,14 @@ export default function Home() {
   const handleSearch = async () => {
     if (!info.name || !info.studentId) { alert("이름과 학번을 입력해주세요."); return; }
     setIsSearching(true);
+    setAdminSearchKeyword('');
+    setAdminPianoFilter('전체');
     const now = new Date();
     const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     let query = supabase.from('reservations').select('*');
     if (info.name === '운영자' && info.studentId === '12345') { 
       setIsAdmin(true); 
-      query = query.order('data', { ascending: true }); 
+      query = query.gte('data', today).order('data', { ascending: true }).order('start_time', { ascending: true }); 
     } else { 
       setIsAdmin(false); 
       query = query.eq('user_name', info.name).eq('student_id', info.studentId).gte('data', today).order('data', { ascending: true }); 
@@ -145,8 +165,45 @@ export default function Home() {
 
             {/* 예약 결과 리스트 */}
             {myReservations.length > 0 && (
-              <div className="mt-6 max-h-[250px] overflow-y-auto flex flex-col gap-3 pr-1 custom-scrollbar">
-                {myReservations.map((res) => (
+              <div className="mt-6 flex flex-col gap-3">
+                {isAdmin && (
+                  <div className="rounded-[20px] bg-[#F3F6FC] p-4 border border-[#E7ECFA]">
+                    <div className="flex items-center justify-between gap-3 mb-3">
+                      <div>
+                        <p className="text-[14px] font-black text-[#333333] tracking-[-0.03em]">관리자 예약 관리</p>
+                        <p className="mt-0.5 text-[12px] font-medium text-[#8A93A8]">오늘 이후 예약 {myReservations.length}건</p>
+                      </div>
+                      <span className="rounded-full bg-white px-3 py-1 text-[12px] font-bold text-[#6C86D3] shadow-sm">
+                        {filteredReservations.length}건 표시
+                      </span>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="이름, 학번, 날짜로 검색"
+                      value={adminSearchKeyword}
+                      className="w-full rounded-[14px] bg-white px-4 py-3 text-[13px] font-medium outline-none focus:ring-2 ring-[#C7D4F4] transition-all"
+                      onChange={(e) => setAdminSearchKeyword(e.target.value)}
+                    />
+                    <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+                      {pianos.map((piano) => (
+                        <button
+                          key={piano}
+                          onClick={() => setAdminPianoFilter(piano)}
+                          className={`shrink-0 rounded-full px-3 py-2 text-[12px] font-bold transition-all ${
+                            adminPianoFilter === piano
+                              ? 'bg-[#C7D4F4] text-[#1A1A1A] shadow-sm'
+                              : 'bg-white text-[#8A93A8]'
+                          }`}
+                        >
+                          {piano}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="max-h-[320px] overflow-y-auto flex flex-col gap-3 pr-1 custom-scrollbar">
+                {filteredReservations.length > 0 ? filteredReservations.map((res) => (
                   <div key={res.id} className="bg-white p-4 rounded-[16px] shadow-sm flex justify-between items-center border border-gray-100">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
@@ -158,7 +215,13 @@ export default function Home() {
                     </div>
                     <button onClick={() => handleDelete(res.id)} className="text-red-500 text-[13px] font-bold px-3 py-2 hover:bg-red-50 rounded-xl transition-colors">취소</button>
                   </div>
-                ))}
+                )) : (
+                  <div className="rounded-[16px] bg-white p-6 text-center border border-gray-100">
+                    <p className="text-[14px] font-bold text-[#666666]">검색 결과가 없습니다.</p>
+                    <p className="mt-1 text-[12px] text-[#B2B2B2]">검색어 또는 피아노 필터를 바꿔보세요.</p>
+                  </div>
+                )}
+                </div>
               </div>
             )}
             
