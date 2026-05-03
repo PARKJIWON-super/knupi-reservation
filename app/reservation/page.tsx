@@ -307,8 +307,7 @@ export default function ReservationPage() {
               <div className="w-full bg-white/60 rounded-[18px] p-5 mb-5 border border-white/20">
                 <p className="font-bold text-[14px] mb-3 flex items-center gap-2 text-black">⚠️ 이용 주의사항</p>
                 <ul className="text-[13px] text-gray-700 space-y-2 font-medium">
-                  <li className="flex items-center gap-2">• 음식물 반입 금지 🚫</li>
-                  <li className="flex items-center gap-2">• 뒷정리 필수 ‼️</li>
+                  <li className="flex items-center gap-2">• 음식물 섭취 후 뒷정리 필수 ‼️</li>
                   <li className="flex items-center gap-2">• 노쇼 시 향후 이용이 제한될 수 있습니다. 😔</li>
                 </ul>
                 <div className="mt-4 pt-3 border-t border-dashed border-black/10 text-center">
