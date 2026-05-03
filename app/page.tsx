@@ -128,7 +128,7 @@ export default function Home() {
       
       {/* 🚀 모달 레이어: showLookup이 true일 때만 표시 */}
       {showLookup && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center px-[20px]">
+        <div className="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto px-[20px] py-8 sm:items-center">
           {/* 뒷배경 어둡게 처리 및 클릭 시 닫기 */}
           <div 
             className="absolute inset-0 bg-black/40 backdrop-blur-sm" 
@@ -136,7 +136,7 @@ export default function Home() {
           />
           
           {/* 모달 박스 */}
-          <div className="relative w-full max-w-[400px] bg-white rounded-[32px] p-8 shadow-2xl animate-in zoom-in-95 duration-200">
+          <div className="relative my-auto w-full max-w-[400px] max-h-[calc(100vh-64px)] overflow-y-auto bg-white rounded-[32px] p-8 shadow-2xl animate-in zoom-in-95 duration-200 custom-scrollbar">
             <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-6" />
             
             <h3 className="text-[20px] font-bold text-center mb-8 tracking-[-0.03em]">조회 정보를 입력하세요</h3>
@@ -202,7 +202,7 @@ export default function Home() {
                   </div>
                 )}
 
-                <div className="max-h-[320px] overflow-y-auto flex flex-col gap-3 pr-1 custom-scrollbar">
+                <div className="max-h-[min(320px,35vh)] overflow-y-auto flex flex-col gap-3 pr-1 custom-scrollbar">
                 {filteredReservations.length > 0 ? filteredReservations.map((res) => (
                   <div key={res.id} className="bg-white p-4 rounded-[16px] shadow-sm flex justify-between items-center border border-gray-100">
                     <div>
