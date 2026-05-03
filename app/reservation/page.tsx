@@ -255,11 +255,11 @@ export default function ReservationPage() {
                       <input type="text" placeholder="학번" maxLength={10} value={formData.studentId} className="w-full p-4 rounded-full bg-white text-[14px] outline-none shadow-sm" onChange={(e) => setFormData({...formData, studentId: e.target.value})} />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
-                      <select className="w-full p-4 rounded-full bg-white text-[14px] outline-none appearance-none px-5" value={formData.start ?? ""} onChange={(e) => setFormData({...formData, start: e.target.value === "" ? null : Number(e.target.value)})}>
+                      <select className={`w-full p-4 rounded-full bg-white text-[14px] outline-none appearance-none px-5 ${formData.start === null ? 'text-gray-400' : 'text-black'}`} value={formData.start ?? ""} onChange={(e) => setFormData({...formData, start: e.target.value === "" ? null : Number(e.target.value)})}>
                         <option value="" disabled hidden>시작 시간</option>
                         {timeSlots.map(t => <option key={t} value={t}>{formatTimeDisplay(t)}</option>)}
                       </select>
-                      <select className="w-full p-4 rounded-full bg-white text-[14px] outline-none appearance-none px-5" value={formData.end ?? ""} onChange={(e) => setFormData({...formData, end: e.target.value === "" ? null : Number(e.target.value)})}>
+                      <select className={`w-full p-4 rounded-full bg-white text-[14px] outline-none appearance-none px-5 ${formData.end === null ? 'text-gray-400' : 'text-black'}`} value={formData.end ?? ""} onChange={(e) => setFormData({...formData, end: e.target.value === "" ? null : Number(e.target.value)})}>
                         <option value="" disabled hidden>종료 시간</option>
                         {endSlots.map(t => <option key={t} value={t}>{formatTimeDisplay(t)}</option>)}
                       </select>
