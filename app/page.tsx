@@ -20,6 +20,10 @@ export default function Home() {
     return `${hours}:${minutes}`;
   };
 
+  const formatPracticeHours = (hours: number) => {
+    return Number.isInteger(hours) ? `${hours}시간` : `${hours.toFixed(1)}시간`;
+  };
+
   const fetchRankings = async () => {
     const now = new Date();
     const firstDayOfMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
@@ -233,48 +237,86 @@ export default function Home() {
 
         {/* 3️⃣ 이달의 랭킹 TOP 10 */}
         <section className="flex flex-col gap-[12px]">
-          <h2 className="text-[22px] font-bold tracking-[-0.03em] text-[#1A1A1A] px-1">{currentMonth}월의 랭킹 TOP 10</h2>
-          <div className="flex flex-col gap-4">
-            <div className="w-full h-[181px] bg-white/20 backdrop-blur-lg rounded-[20px] flex items-end justify-center px-[60px] pb-[20px] gap-[10px] border border-white/20 shadow-sm">
-              {rankings[1] && (
-              <div className="flex-1 bg-[#C7D4F4]/55 border border-[#B9C8ED] rounded-[5px] flex flex-col items-center justify-center py-2 transition-all" style={{ height: '73.11px' }}>
-                <span className="text-[16px] font-semibold text-[#808080] tracking-[-0.03em]">{rankings[1].name}</span>
-                <span className="text-[14px] text-[#808080]">
-  <span className="font-bold">{rankings[1].total}</span>시간
-</span>
-              </div>
-            )}
-            {rankings[0] && (
-              <div className="flex-1 bg-[#C7D4F4] border border-[#B9C8ED] rounded-[5px] flex flex-col items-center justify-center py-2 shadow-lg relative" style={{ height: '131px' }}>
-                <span className="text-[16px] font-semibold text-black tracking-[-0.03em]">{rankings[0].name}</span>
-                <span className="text-[14px] text-black">
-  <span className="font-bold">{rankings[0].total}</span>시간
-</span>
-              </div>
-            )}
-            {rankings[2] && (
-              <div className="flex-1 bg-[#C7D4F4]/55 border border-[#B9C8ED] rounded-[5px] flex flex-col items-center justify-center py-2 transition-all" style={{ height: '46px' }}>
-                <span className="text-[16px] font-semibold text-[#808080] tracking-[-0.03em]">{rankings[2].name}</span>
-                <span className="text-[14px] text-[#808080]">
-  <span className="font-bold">{rankings[2].total}</span>시간
-</span>
-              </div>
-            )}
+          <div className="flex items-end justify-between px-1">
+            <div>
+              <h2 className="text-[22px] font-bold tracking-[-0.03em] text-[#1A1A1A]">{currentMonth}월의 랭킹 TOP 10</h2>
+              <p className="mt-1 text-[13px] font-medium text-[#8A93A8] tracking-[-0.03em]">이번 달 누적 연습시간 기준</p>
             </div>
+            <span className="rounded-full bg-white/60 px-3 py-1 text-[12px] font-bold text-[#6C86D3] shadow-sm border border-white/50">
+              LIVE
+            </span>
+          </div>
 
-            {/* Ranks 4-10 */}
-            {rankings.length > 3 && (
-              <div className="w-full bg-white/30 backdrop-blur-lg rounded-[20px] p-5 flex flex-col gap-3 border border-white/20 shadow-sm">
-                {rankings.slice(3).map((rank, index) => (
-                  <div key={index + 3} className="flex justify-between items-center bg-white/50 px-4 py-3 rounded-[12px] shadow-sm">
-                    <div className="flex items-center gap-3">
-                      <span className="text-[16px] font-bold text-[#6C86D3] w-[20px]">{index + 4}</span>
-                      <span className="text-[16px] font-semibold text-[#333333] tracking-[-0.03em]">{rank.name}</span>
-                    </div>
-                    <span className="text-[15px] text-[#333333]"><span className="font-bold">{rank.total}</span>시간</span>
-                  </div>
-                ))}
+          <div className="w-full overflow-hidden rounded-[28px] border border-white/50 bg-white/35 backdrop-blur-xl shadow-[0_14px_40px_rgba(108,134,211,0.13)]">
+            {rankings.length === 0 ? (
+              <div className="flex min-h-[220px] flex-col items-center justify-center px-8 text-center">
+                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#C7D4F4]/50 text-[26px]">🎹</div>
+                <p className="text-[17px] font-bold text-[#333333] tracking-[-0.03em]">아직 랭킹이 없어요</p>
+                <p className="mt-2 text-[14px] font-medium leading-relaxed text-[#8A93A8]">이번 달 첫 연습 예약을 남겨보세요.</p>
               </div>
+            ) : (
+              <>
+                <div className="relative px-5 pb-6 pt-7">
+                  <div className="absolute inset-x-0 top-0 h-[140px] bg-gradient-to-b from-[#C7D4F4]/50 to-transparent" />
+                  <div className="relative grid grid-cols-3 items-end gap-3">
+                    {[
+                      { rank: 2, item: rankings[1], height: 'h-[128px]', medal: '🥈', tone: 'from-white/80 to-[#EAF0FF]/80', label: '2nd' },
+                      { rank: 1, item: rankings[0], height: 'h-[166px]', medal: '👑', tone: 'from-[#FFF5E4] to-[#C7D4F4]', label: '1st' },
+                      { rank: 3, item: rankings[2], height: 'h-[108px]', medal: '🥉', tone: 'from-white/75 to-[#F4F7FF]/75', label: '3rd' },
+                    ].map(({ rank, item, height, medal, tone, label }) => (
+                      <div key={rank} className={`relative flex ${height} flex-col items-center justify-between rounded-[22px] bg-gradient-to-b ${tone} p-3 text-center shadow-sm border border-white/60`}>
+                        <span className="absolute -top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white text-[18px] shadow-md border border-white/70">
+                          {medal}
+                        </span>
+                        {item ? (
+                          <>
+                            <div className="mt-5">
+                              <p className="text-[11px] font-black tracking-[0.08em] text-[#6C86D3]">{label}</p>
+                              <p className="mt-2 max-w-[82px] truncate text-[16px] font-extrabold tracking-[-0.05em] text-[#1A1A1A]">{item.name}</p>
+                            </div>
+                            <div className="w-full rounded-[16px] bg-white/70 px-2 py-2 shadow-inner">
+                              <p className="text-[17px] font-black tracking-[-0.04em] text-[#4A63B1]">{formatPracticeHours(item.total)}</p>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="flex h-full flex-col items-center justify-center pt-4">
+                            <p className="text-[11px] font-black tracking-[0.08em] text-[#B2B2B2]">{label}</p>
+                            <p className="mt-2 text-[13px] font-bold text-[#B2B2B2]">대기중</p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2.5 rounded-t-[28px] bg-white/65 px-4 py-5">
+                  {rankings.slice(3).map((rank, index) => {
+                    const rankNumber = index + 4;
+                    const maxTotal = rankings[0]?.total || rank.total || 1;
+                    const percentage = Math.max(8, Math.min(100, (rank.total / maxTotal) * 100));
+
+                    return (
+                      <div key={`${rank.name}-${rankNumber}`} className="rounded-[18px] bg-white p-4 shadow-sm border border-[#EEF2FF]">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex min-w-0 items-center gap-3">
+                            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#F3F6FC] text-[13px] font-black text-[#6C86D3]">
+                              {rankNumber}
+                            </span>
+                            <span className="truncate text-[15px] font-bold tracking-[-0.03em] text-[#333333]">{rank.name}</span>
+                          </div>
+                          <span className="shrink-0 text-[14px] font-black tracking-[-0.03em] text-[#4A63B1]">{formatPracticeHours(rank.total)}</span>
+                        </div>
+                        <div className="mt-3 h-2 overflow-hidden rounded-full bg-[#EEF2FF]">
+                          <div
+                            className="h-full rounded-full bg-gradient-to-r from-[#C7D4F4] to-[#8DA6EA]"
+                            style={{ width: `${percentage}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
             )}
           </div>
         </section>
