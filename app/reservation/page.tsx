@@ -4,18 +4,40 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
+type Reservation = {
+  id?: number;
+  user_name: string;
+  student_id: string;
+  piano_name: string;
+  data: string;
+  start_time: number;
+  end_time: number;
+};
+
+const isDuplicateReservationError = (error: { code?: string; message?: string } | null) => {
+  if (!error) return false;
+
+  return (
+    error.code === '23P01' ||
+    error.code === '23505' ||
+    error.message?.toLowerCase().includes('no_overlapping_reservations') ||
+    error.message?.toLowerCase().includes('conflicting key value violates exclusion constraint')
+  );
+};
+
 export default function ReservationPage() {
   const pianos = ["1번 피아노", "2번 피아노", "3번 피아노", "업라이트 피아노"];
   const timeSlots = Array.from({ length: 30 }, (_, i) => 9 + i * 0.5);
   const endSlots = Array.from({ length: 31 }, (_, i) => 9 + i * 0.5).filter(t => t > 9);
 
-  const [dbReservations, setDbReservations] = useState<any[]>([]);
+  const [dbReservations, setDbReservations] = useState<Reservation[]>([]);
   const [activePiano, setActivePiano] = useState<string | null>(null);
   const [showMap, setShowMap] = useState(false);
   const [tooltip, setTooltip] = useState<{ piano: string; time: number; name: string } | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [confirmedInfo, setConfirmedInfo] = useState<any>(null);
+  const [confirmedInfo, setConfirmedInfo] = useState<Reservation | null>(null);
 
   const dates = Array.from({ length: 14 }, (_, i) => {
     const d = new Date();
@@ -63,6 +85,8 @@ export default function ReservationPage() {
   };
 
   const handleReserve = async (pianoName: string) => {
+    if (isSubmitting) return;
+
     if (!formData.name || !formData.studentId || formData.start === null || formData.end === null) {
       return alert("모든 정보를 입력하고 시간을 선택해주세요.");
     }
@@ -73,20 +97,29 @@ export default function ReservationPage() {
       return alert("종료 시간은 시작 시간보다 늦어야 합니다.");
     }
 
-    const isOverlap = dbReservations.some(res => {
-      return (
-        res.piano_name === pianoName &&
-        String(res.data) === String(selectedDate) &&
-        formData.start! < res.end_time && 
-        formData.end! > res.start_time
-      );
-    });
+    setIsSubmitting(true);
 
-    if (isOverlap) {
-      return alert("❌ 죄송합니다. 선택하신 시간대에 이미 예약이 존재합니다.");
+    // 빠른 안내를 위한 사전 검사입니다. 실제 동시 예약 방지는 DB 제약 조건이 최종적으로 처리합니다.
+    const { data: latestReservations, error: latestReservationsError } = await supabase
+      .from('reservations')
+      .select('start_time, end_time')
+      .eq('piano_name', pianoName)
+      .eq('data', selectedDate)
+      .lt('start_time', formData.end)
+      .gt('end_time', formData.start);
+
+    if (latestReservationsError) {
+      setIsSubmitting(false);
+      return alert("예약 정보를 확인하는 중 오류가 발생했습니다. 다시 시도해주세요.");
     }
 
-    const reservationData = { 
+    if ((latestReservations || []).length > 0) {
+      await fetchReservations();
+      setIsSubmitting(false);
+      return alert("❌ 이미 예약된 시간입니다. 다른 시간을 선택해주세요.");
+    }
+
+    const reservationData: Reservation = { 
       user_name: formData.name, 
       student_id: formData.studentId, 
       piano_name: pianoName, 
@@ -102,10 +135,15 @@ export default function ReservationPage() {
       setShowSuccessModal(true);
       setActivePiano(null); 
       setFormData({ name: '', studentId: '', start: null, end: null });
-      fetchReservations(); 
+      await fetchReservations(); 
+    } else if (isDuplicateReservationError(error)) {
+      await fetchReservations();
+      alert("❌ 죄송합니다. 방금 다른 사용자가 같은 시간대를 먼저 예약했습니다. 다른 시간을 선택해주세요.");
     } else {
       alert("예약에 실패했습니다. 다시 시도해주세요.");
     }
+
+    setIsSubmitting(false);
   };
 
   const currentDisplayDate = dates.find(d => d.fullDate === selectedDate) || dates[0];
@@ -226,7 +264,13 @@ export default function ReservationPage() {
                         {endSlots.map(t => <option key={t} value={t}>{formatTimeDisplay(t)}</option>)}
                       </select>
                     </div>
-                    <button onClick={() => handleReserve(piano)} className="w-full bg-[#C7D4F4] text-black font-bold py-4 rounded-[18px] mt-2 shadow-md active:scale-95 transition-all text-[16px]">예약 신청하기</button>
+                    <button
+                      onClick={() => handleReserve(piano)}
+                      disabled={isSubmitting}
+                      className="w-full bg-[#C7D4F4] text-black font-bold py-4 rounded-[18px] mt-2 shadow-md active:scale-95 transition-all text-[16px] disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                      {isSubmitting ? '예약 확인 중...' : '예약 신청하기'}
+                    </button>
                   </div>
                 )}
               </div>
