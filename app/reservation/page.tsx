@@ -280,9 +280,9 @@ export default function ReservationPage() {
 
         {/* ✅ 예약 확정 성공 모달 - #FFF5E4와 #C7D4F4가 섞인 배경 적용 */}
         {showSuccessModal && confirmedInfo && (
-          <div className="fixed inset-0 z-[200] flex items-end justify-center bg-black/50 backdrop-blur-sm transition-all animate-in fade-in duration-300">
+          <div className="fixed inset-0 z-[200] flex items-end justify-center overflow-y-auto bg-black/50 px-4 py-6 backdrop-blur-sm transition-all animate-in fade-in duration-300 sm:items-center">
             <div 
-              className="w-full max-w-[480px] rounded-t-[40px] p-8 pb-12 flex flex-col items-center animate-in slide-in-from-bottom-full duration-500 shadow-2xl relative"
+              className="relative my-auto flex max-h-[calc(100vh-48px)] w-full max-w-[480px] flex-col items-center overflow-y-auto rounded-[40px] p-8 pb-10 shadow-2xl animate-in slide-in-from-bottom-full duration-500 custom-scrollbar"
               style={{ background: 'linear-gradient(135deg, #FFF5E4 0%, #C7D4F4 100%)' }}
             >
               <div className="w-12 h-1.5 bg-black/10 rounded-full mb-8"></div>
