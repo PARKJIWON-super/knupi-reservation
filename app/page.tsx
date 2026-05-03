@@ -337,7 +337,7 @@ export default function Home() {
                               <p className="text-[11px] font-black tracking-[0.08em] text-[#6C86D3]">{label}</p>
                               <p className="mt-2 max-w-[78px] truncate text-[15px] font-extrabold tracking-[-0.05em] text-[#1A1A1A]">{item.name}</p>
                             </div>
-                            <div className="w-full min-w-0 rounded-[15px] bg-white/70 px-1.5 py-2 shadow-inner">
+                            <div className="w-full min-w-0 px-1 py-1.5">
                               <p className="w-full truncate whitespace-nowrap text-center text-[clamp(12px,3.5vw,15px)] font-black tracking-[-0.06em] text-[#4A63B1] leading-none">
                                 {formatPracticeHours(item.total)}
                               </p>
