@@ -175,7 +175,7 @@ export default function ReservationPage() {
             <button key={d.fullDate} onClick={() => { setSelectedDate(d.fullDate); setTooltip(null); }}
               className={`flex flex-col items-center min-w-[35px] transition-all ${
         selectedDate === d.fullDate 
-        ? 'bg-white/45 p-[10px_6px] rounded-[8px] -mt-[10px] shadow-sm' 
+        ? 'bg-white/45 p-[10px_6px] rounded-[12px] shadow-sm' 
         : ''
       }`}
     >
