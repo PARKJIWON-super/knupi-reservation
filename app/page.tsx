@@ -321,13 +321,13 @@ export default function Home() {
               <>
                 <div className="relative px-5 pb-6 pt-7">
                   <div className="absolute inset-x-0 top-0 h-[140px] bg-gradient-to-b from-[#C7D4F4]/50 to-transparent" />
-                  <div className="relative grid grid-cols-3 items-end gap-3">
+                  <div className="relative grid grid-cols-3 items-end gap-2">
                     {[
                       { rank: 2, item: rankings[1], height: 'h-[128px]', medal: '🥈', tone: 'from-white/80 to-[#EAF0FF]/80', label: '2nd' },
                       { rank: 1, item: rankings[0], height: 'h-[166px]', medal: '👑', tone: 'from-[#FFF5E4] to-[#C7D4F4]', label: '1st' },
                       { rank: 3, item: rankings[2], height: 'h-[108px]', medal: '🥉', tone: 'from-white/75 to-[#F4F7FF]/75', label: '3rd' },
                     ].map(({ rank, item, height, medal, tone, label }) => (
-                      <div key={rank} className={`relative flex ${height} flex-col items-center justify-between rounded-[22px] bg-gradient-to-b ${tone} p-3 text-center shadow-sm border border-white/60`}>
+                      <div key={rank} className={`relative flex ${height} min-w-0 flex-col items-center justify-between rounded-[22px] bg-gradient-to-b ${tone} p-2.5 text-center shadow-sm border border-white/60`}>
                         <span className="absolute -top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white text-[18px] shadow-md border border-white/70">
                           {medal}
                         </span>
@@ -335,10 +335,12 @@ export default function Home() {
                           <>
                             <div className="mt-5">
                               <p className="text-[11px] font-black tracking-[0.08em] text-[#6C86D3]">{label}</p>
-                              <p className="mt-2 max-w-[82px] truncate text-[16px] font-extrabold tracking-[-0.05em] text-[#1A1A1A]">{item.name}</p>
+                              <p className="mt-2 max-w-[78px] truncate text-[15px] font-extrabold tracking-[-0.05em] text-[#1A1A1A]">{item.name}</p>
                             </div>
-                            <div className="w-full rounded-[16px] bg-white/70 px-2 py-2 shadow-inner">
-                              <p className="text-[17px] font-black tracking-[-0.04em] text-[#4A63B1]">{formatPracticeHours(item.total)}</p>
+                            <div className="w-full min-w-0 rounded-[15px] bg-white/70 px-1.5 py-2 shadow-inner">
+                              <p className="w-full truncate whitespace-nowrap text-center text-[clamp(12px,3.5vw,15px)] font-black tracking-[-0.06em] text-[#4A63B1] leading-none">
+                                {formatPracticeHours(item.total)}
+                              </p>
                             </div>
                           </>
                         ) : (
