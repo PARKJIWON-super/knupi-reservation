@@ -280,38 +280,38 @@ export default function ReservationPage() {
 
         {/* ✅ 예약 확정 성공 모달 - #FFF5E4와 #C7D4F4가 섞인 배경 적용 */}
         {showSuccessModal && confirmedInfo && (
-          <div className="fixed inset-0 z-[200] flex items-end justify-center overflow-y-auto bg-black/50 px-4 py-6 backdrop-blur-sm transition-all animate-in fade-in duration-300 sm:items-center">
+          <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 px-4 py-4 backdrop-blur-sm transition-all animate-in fade-in duration-300">
             <div 
-              className="relative my-auto flex max-h-[calc(100vh-48px)] w-full max-w-[480px] flex-col items-center overflow-y-auto rounded-[40px] p-8 pb-10 shadow-2xl animate-in slide-in-from-bottom-full duration-500 custom-scrollbar"
+              className="relative flex w-full max-w-[430px] flex-col items-center rounded-[34px] p-6 shadow-2xl animate-in zoom-in-95 slide-in-from-bottom-4 duration-300"
               style={{ background: 'linear-gradient(135deg, #FFF5E4 0%, #C7D4F4 100%)' }}
             >
-              <div className="w-12 h-1.5 bg-black/10 rounded-full mb-8"></div>
+              <div className="w-10 h-1.5 bg-black/10 rounded-full mb-5"></div>
               
-              <div className="w-20 h-20 bg-white/80 rounded-full flex items-center justify-center mb-6 shadow-sm">
-                <div className="w-10 h-10 rounded-full border-4 border-[#A5BBEF] flex items-center justify-center">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6C86D3" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <div className="w-16 h-16 bg-white/80 rounded-full flex items-center justify-center mb-4 shadow-sm">
+                <div className="w-9 h-9 rounded-full border-4 border-[#A5BBEF] flex items-center justify-center">
+                  <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#6C86D3" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                 </div>
               </div>
 
-              <h2 className="text-[26px] font-bold mb-8 text-black tracking-tight">
+              <h2 className="text-[23px] font-bold mb-5 text-black tracking-tight">
                 예약이 <span className="text-[#C7A27C]">확정되었습니다</span>
               </h2>
 
-              <div className="w-full bg-white/90 rounded-[25px] p-6 shadow-sm mb-10 flex flex-col items-center">
+              <div className="w-full bg-white/90 rounded-[22px] p-5 shadow-sm mb-5 flex flex-col items-center">
                 <span className="text-[18px] font-bold text-gray-800 mb-2">{confirmedInfo.piano_name}</span>
                 <span className="text-[16px] font-medium text-[#6C86D3]">
                   {confirmedInfo.data.replace(/-/g, '.')} <span className="text-gray-900 ml-1">{formatTimeDisplay(confirmedInfo.start_time)}~{formatTimeDisplay(confirmedInfo.end_time)}</span>
                 </span>
               </div>
 
-              <div className="w-full bg-white/60 rounded-[20px] p-6 mb-8 border border-white/20">
-                <p className="font-bold text-[15px] mb-4 flex items-center gap-2 text-black">⚠️ 이용 주의사항</p>
-                <ul className="text-[14px] text-gray-700 space-y-3 font-medium">
+              <div className="w-full bg-white/60 rounded-[18px] p-5 mb-5 border border-white/20">
+                <p className="font-bold text-[14px] mb-3 flex items-center gap-2 text-black">⚠️ 이용 주의사항</p>
+                <ul className="text-[13px] text-gray-700 space-y-2 font-medium">
                   <li className="flex items-center gap-2">• 음식물 반입 금지 🚫</li>
                   <li className="flex items-center gap-2">• 뒷정리 필수 ‼️</li>
                   <li className="flex items-center gap-2">• 노쇼 시 향후 이용이 제한될 수 있습니다. 😔</li>
                 </ul>
-                <div className="mt-6 pt-4 border-t border-dashed border-black/10 text-center">
+                <div className="mt-4 pt-3 border-t border-dashed border-black/10 text-center">
                    <p className="text-[12px] text-gray-500 mb-1">💬 문의 : 크누피 집행부</p>
                    <a 
                     href="https://open.kakao.com/o/s5DRwRei" 
@@ -326,7 +326,7 @@ export default function ReservationPage() {
 
               <button 
                 onClick={() => setShowSuccessModal(false)}
-                className="w-full bg-[#1A1A1A] text-white font-bold py-5 rounded-[20px] text-[16px] shadow-lg active:scale-95 transition-all"
+                className="w-full bg-[#1A1A1A] text-white font-bold py-4 rounded-[18px] text-[16px] shadow-lg active:scale-95 transition-all"
               >
                 확인
               </button>
