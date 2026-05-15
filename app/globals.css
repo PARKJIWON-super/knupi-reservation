@@ -24,3 +24,18 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Vercel Preview Toolbar 숨김 */
+[data-vercel-toolbar],
+[data-vercel-live-feedback],
+#vercel-toolbar,
+#vercel-live-feedback,
+vercel-live-feedback,
+iframe[src*="vercel.live"],
+iframe[src*="vercel.com/toolbar"],
+iframe[title*="Vercel"],
+iframe[title*="vercel"] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
