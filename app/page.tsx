@@ -126,11 +126,9 @@ export default function Home() {
     let query = supabase.from('reservations').select('*');
     if (info.name === '운영자' && info.studentId === '12345') { 
       setIsAdmin(true); 
-      localStorage.setItem('knupi_admin_mode', 'true');
       query = query.gte('data', today).order('data', { ascending: true }).order('start_time', { ascending: true }); 
     } else { 
       setIsAdmin(false); 
-      localStorage.removeItem('knupi_admin_mode');
       query = query.eq('user_name', info.name).eq('student_id', info.studentId).gte('data', today).order('data', { ascending: true }); 
     }
     const { data, error } = await query;
