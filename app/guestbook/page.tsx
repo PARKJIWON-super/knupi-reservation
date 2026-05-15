@@ -29,6 +29,7 @@ export default function GuestbookPage() {
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const messageListRef = useRef<HTMLDivElement | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
@@ -56,19 +57,27 @@ export default function GuestbookPage() {
   }, []);
 
   useEffect(() => {
+    setIsAdmin(localStorage.getItem('knupi_admin_mode') === 'true');
     fetchMessages();
 
     const channel = supabase
       .channel('public:guestbook_messages')
       .on(
         'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'guestbook_messages' },
+        { event: '*', schema: 'public', table: 'guestbook_messages' },
         (payload) => {
-          const newMessage = payload.new as GuestbookMessage;
-          setMessages((prev) => {
-            if (prev.some((item) => item.id === newMessage.id)) return prev;
-            return [...prev, newMessage];
-          });
+          if (payload.eventType === 'INSERT') {
+            const newMessage = payload.new as GuestbookMessage;
+            setMessages((prev) => {
+              if (prev.some((item) => item.id === newMessage.id)) return prev;
+              return [...prev, newMessage];
+            });
+          }
+
+          if (payload.eventType === 'DELETE') {
+            const deletedMessage = payload.old as Pick<GuestbookMessage, 'id'>;
+            setMessages((prev) => prev.filter((item) => item.id !== deletedMessage.id));
+          }
         }
       )
       .subscribe();
@@ -121,6 +130,25 @@ export default function GuestbookPage() {
     setIsSubmitting(false);
   };
 
+  const handleDeleteMessage = async (id: number) => {
+    if (!isAdmin) return;
+    if (!confirm('이 방명록 메시지를 삭제하시겠습니까?')) return;
+
+    const { error } = await supabase.rpc('delete_guestbook_message_as_admin', {
+      message_id: id,
+      admin_name: '운영자',
+      admin_code: '12345',
+    });
+
+    if (error) {
+      console.error('방명록 삭제에 실패했습니다:', error);
+      alert('방명록 삭제에 실패했습니다. Supabase 함수/권한 설정을 확인해주세요.');
+      return;
+    }
+
+    setMessages((prev) => prev.filter((item) => item.id !== id));
+  };
+
   return (
     <main className="h-screen bg-[#F9FAFB] font-['Pretendard'] text-[#1A1A1A] flex flex-col items-center overflow-hidden">
       <div
@@ -151,7 +179,9 @@ export default function GuestbookPage() {
           <div className="flex shrink-0 items-center justify-between border-b border-white/60 px-5 py-4">
             <div>
               <p className="text-[15px] font-black tracking-[-0.03em]">Knupi Chat</p>
-              <p className="text-[12px] font-medium text-[#8A93A8]">최근 메시지 {messages.length}개</p>
+              <p className="text-[12px] font-medium text-[#8A93A8]">
+                최근 메시지 {messages.length}개{isAdmin ? ' · 운영자 삭제 가능' : ''}
+              </p>
             </div>
             <span className="rounded-full bg-[#C7D4F4]/70 px-3 py-1 text-[12px] font-bold text-[#4A63B1]">LIVE</span>
           </div>
@@ -176,6 +206,15 @@ export default function GuestbookPage() {
                         <div className={`flex items-center gap-2 px-1 ${isMine ? 'flex-row-reverse' : ''}`}>
                           <span className="max-w-[150px] truncate text-[12px] font-black text-[#6C86D3]">{item.nickname}</span>
                           <span className="text-[11px] font-medium text-[#B2B2B2]">{formatMessageTime(item.created_at)}</span>
+                          {isAdmin && (
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteMessage(item.id)}
+                              className="rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-black text-red-500 transition-colors hover:bg-red-100 active:scale-95"
+                            >
+                              삭제
+                            </button>
+                          )}
                         </div>
                         <div className={`whitespace-pre-wrap break-words rounded-[22px] px-4 py-3 text-[15px] font-semibold leading-relaxed tracking-[-0.03em] shadow-sm ${
                           isMine
