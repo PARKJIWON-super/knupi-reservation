@@ -41,8 +41,7 @@ export default function GuestbookPage() {
     const { data, error } = await supabase
       .from('guestbook_messages')
       .select('*')
-      .order('created_at', { ascending: false })
-      .limit(100);
+      .order('created_at', { ascending: true });
 
     if (error) {
       console.error('방명록을 불러오지 못했습니다:', error);
@@ -51,7 +50,7 @@ export default function GuestbookPage() {
       return;
     }
 
-    setMessages([...(data || [])].reverse());
+    setMessages(data || []);
     setIsLoading(false);
   }, []);
 
@@ -67,7 +66,7 @@ export default function GuestbookPage() {
           const newMessage = payload.new as GuestbookMessage;
           setMessages((prev) => {
             if (prev.some((item) => item.id === newMessage.id)) return prev;
-            return [...prev, newMessage].slice(-100);
+            return [...prev, newMessage];
           });
         }
       )
