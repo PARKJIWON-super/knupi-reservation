@@ -16,20 +16,11 @@ const formatPracticeHours = (hours: number) => {
 export default function RankingsPage() {
   const [rankings, setRankings] = useState<Ranking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const currentMonth = new Date().getMonth() + 1;
 
   const fetchRankings = async () => {
-    const now = new Date();
-    const firstDayOfMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
-    const firstDayOfNextMonth = now.getMonth() === 11
-      ? `${now.getFullYear() + 1}-01-01`
-      : `${now.getFullYear()}-${String(now.getMonth() + 2).padStart(2, '0')}-01`;
-
     const { data, error } = await supabase
       .from('reservations')
-      .select('user_name, student_id, start_time, end_time')
-      .gte('data', firstDayOfMonth)
-      .lt('data', firstDayOfNextMonth);
+      .select('user_name, student_id, start_time, end_time');
 
     if (error) {
       console.error('전체 순위를 불러오지 못했습니다:', error);
@@ -82,7 +73,7 @@ export default function RankingsPage() {
           <div>
             <p className="text-[14px] font-bold text-[#6C86D3] tracking-[-0.03em]">Ranking</p>
             <h1 className="mt-1 text-[30px] font-black tracking-[-0.05em] text-[#1A1A1A]">누적 시간 순위</h1>
-            <p className="mt-2 text-[14px] font-semibold tracking-[-0.03em] text-[#7B8AB0]">{currentMonth}월 누적 연습시간 기준</p>
+            <p className="mt-2 text-[14px] font-semibold tracking-[-0.03em] text-[#7B8AB0]">전체 예약 내역 누적 연습시간 기준</p>
           </div>
           <Link href="/" className="flex h-11 w-11 items-center justify-center rounded-full bg-white/55 shadow-sm active:scale-90 transition-transform">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -108,7 +99,7 @@ export default function RankingsPage() {
               <div className="flex min-h-[280px] flex-col items-center justify-center text-center">
                 <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#C7D4F4]/50 text-[26px]">🎹</div>
                 <p className="text-[17px] font-bold tracking-[-0.03em] text-[#333333]">아직 순위가 없어요</p>
-                <p className="mt-2 text-[14px] font-medium text-[#8A93A8]">이번 달 첫 예약을 남겨보세요.</p>
+                <p className="mt-2 text-[14px] font-medium text-[#8A93A8]">첫 예약을 남겨보세요.</p>
               </div>
             ) : (
               <div className="flex flex-col gap-2.5">
