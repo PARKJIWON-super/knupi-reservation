@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
@@ -28,17 +28,20 @@ export default function GuestbookPage() {
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const messageListRef = useRef<HTMLDivElement | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   const scrollToBottom = () => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    requestAnimationFrame(() => {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    });
   };
 
-  const fetchMessages = async () => {
+  const fetchMessages = useCallback(async () => {
     const { data, error } = await supabase
       .from('guestbook_messages')
       .select('*')
-      .order('created_at', { ascending: true })
+      .order('created_at', { ascending: false })
       .limit(100);
 
     if (error) {
@@ -48,9 +51,9 @@ export default function GuestbookPage() {
       return;
     }
 
-    setMessages(data || []);
+    setMessages([...(data || [])].reverse());
     setIsLoading(false);
-  };
+  }, []);
 
   useEffect(() => {
     fetchMessages();
@@ -73,7 +76,7 @@ export default function GuestbookPage() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [fetchMessages]);
 
   useEffect(() => {
     scrollToBottom();
@@ -119,14 +122,14 @@ export default function GuestbookPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#F9FAFB] font-['Pretendard'] text-[#1A1A1A] flex flex-col items-center overflow-x-hidden">
+    <main className="h-screen bg-[#F9FAFB] font-['Pretendard'] text-[#1A1A1A] flex flex-col items-center overflow-hidden">
       <div
         className="w-full max-w-[480px] h-[270px] absolute top-[-12px] rounded-[15px] z-0 shadow-sm"
         style={{ background: 'radial-gradient(137.53% 99.23% at 92.41% 7.26%, #FFF5E4 0%, #C7D4F4 100%)' }}
       />
 
-      <div className="w-full max-w-[480px] min-h-screen px-[20px] relative z-10 pt-[60px] pb-8 flex flex-col">
-        <header className="flex items-center justify-between mb-8">
+      <div className="w-full max-w-[480px] h-full px-[20px] relative z-10 pt-[52px] pb-5 flex min-h-0 flex-col">
+        <header className="mb-5 flex shrink-0 items-center justify-between">
           <div>
             <p className="text-[14px] font-bold text-[#6C86D3] tracking-[-0.03em]">Guestbook</p>
             <h1 className="mt-1 text-[32px] font-black tracking-[-0.05em] text-[#1A1A1A]">방명록</h1>
@@ -139,13 +142,13 @@ export default function GuestbookPage() {
           </Link>
         </header>
 
-        <section className="mb-5 rounded-[28px] border border-white/55 bg-white/35 p-5 shadow-[0_14px_40px_rgba(108,134,211,0.13)] backdrop-blur-xl">
+        <section className="mb-4 shrink-0 rounded-[28px] border border-white/55 bg-white/35 p-5 shadow-[0_14px_40px_rgba(108,134,211,0.13)] backdrop-blur-xl">
           <p className="text-[18px] font-extrabold tracking-[-0.04em] text-[#333333]">자유롭게 한마디 남겨주세요 💬</p>
           <p className="mt-2 text-[14px] font-medium leading-relaxed text-[#7B8AB0]">채팅하듯 닉네임과 메시지를 적으면 모두가 함께 볼 수 있어요.</p>
         </section>
 
-        <section className="flex min-h-[430px] flex-1 flex-col overflow-hidden rounded-[30px] border border-white/60 bg-white/50 shadow-sm backdrop-blur-xl">
-          <div className="flex items-center justify-between border-b border-white/60 px-5 py-4">
+        <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[30px] border border-white/60 bg-white/50 shadow-sm backdrop-blur-xl">
+          <div className="flex shrink-0 items-center justify-between border-b border-white/60 px-5 py-4">
             <div>
               <p className="text-[15px] font-black tracking-[-0.03em]">Knupi Chat</p>
               <p className="text-[12px] font-medium text-[#8A93A8]">최근 메시지 {messages.length}개</p>
@@ -153,17 +156,17 @@ export default function GuestbookPage() {
             <span className="rounded-full bg-[#C7D4F4]/70 px-3 py-1 text-[12px] font-bold text-[#4A63B1]">LIVE</span>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-4 py-5 custom-scrollbar">
+          <div ref={messageListRef} className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-5 custom-scrollbar">
             {isLoading ? (
-              <div className="flex h-full min-h-[260px] items-center justify-center text-[14px] font-bold text-[#8A93A8]">방명록을 불러오는 중...</div>
+              <div className="flex h-full items-center justify-center text-[14px] font-bold text-[#8A93A8]">방명록을 불러오는 중...</div>
             ) : messages.length === 0 ? (
-              <div className="flex h-full min-h-[260px] flex-col items-center justify-center text-center">
+              <div className="flex h-full flex-col items-center justify-center text-center">
                 <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#C7D4F4]/50 text-[26px]">✍️</div>
                 <p className="text-[17px] font-bold tracking-[-0.03em] text-[#333333]">아직 방명록이 없어요</p>
                 <p className="mt-2 text-[14px] font-medium text-[#8A93A8]">첫 메시지를 남겨보세요.</p>
               </div>
             ) : (
-              <div className="flex flex-col gap-3">
+              <div className="flex min-h-full flex-col justify-end gap-3">
                 {messages.map((item, index) => {
                   const isMine = item.nickname.trim() === nickname.trim() && nickname.trim().length > 0;
 
@@ -190,7 +193,7 @@ export default function GuestbookPage() {
             )}
           </div>
 
-          <form onSubmit={handleSubmit} className="border-t border-white/60 bg-[#F3F6FC]/80 p-4">
+          <form onSubmit={handleSubmit} className="shrink-0 border-t border-white/60 bg-[#F3F6FC]/80 p-4">
             <input
               type="text"
               maxLength={20}
