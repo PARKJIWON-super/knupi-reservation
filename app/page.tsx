@@ -346,9 +346,12 @@ export default function Home() {
               <h2 className="text-[22px] font-bold tracking-[-0.03em] text-[#1A1A1A]">{currentMonth}월의 랭킹 TOP 10</h2>
               <p className="mt-1 text-[13px] font-medium text-[#8A93A8] tracking-[-0.03em]">이번 달 누적 연습시간 기준</p>
             </div>
-            <span className="rounded-full bg-white/60 px-3 py-1 text-[12px] font-bold text-[#6C86D3] shadow-sm border border-white/50">
-              LIVE
-            </span>
+            <Link
+              href="/rankings"
+              className="shrink-0 rounded-full bg-white/70 px-3 py-2 text-[12px] font-bold text-[#6C86D3] shadow-sm border border-white/50 active:scale-95 transition-all hover:bg-white/90"
+            >
+              누적 시간 순위
+            </Link>
           </div>
 
           <div className="w-full overflow-hidden rounded-[28px] border border-white/50 bg-white/35 backdrop-blur-xl shadow-[0_14px_40px_rgba(108,134,211,0.13)]">
