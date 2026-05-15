@@ -15,6 +15,7 @@ const formatMessageTime = (value: string) => {
   const date = new Date(value);
 
   return date.toLocaleString('ko-KR', {
+    year: 'numeric',
     month: 'short',
     day: 'numeric',
     hour: '2-digit',
