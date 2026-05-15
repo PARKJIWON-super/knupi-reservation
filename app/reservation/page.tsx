@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
@@ -12,6 +12,15 @@ type Reservation = {
   data: string;
   start_time: number;
   end_time: number;
+};
+
+const getDateOnly = (value: string) => value.slice(0, 10);
+
+const addDaysToDateString = (dateString: string, days: number) => {
+  const date = new Date(`${getDateOnly(dateString)}T00:00:00`);
+  date.setDate(date.getDate() + days);
+
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 };
 
 const isDuplicateReservationError = (error: { code?: string; message?: string } | null) => {
@@ -39,7 +48,7 @@ export default function ReservationPage() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [confirmedInfo, setConfirmedInfo] = useState<Reservation | null>(null);
 
-  const dates = Array.from({ length: 14 }, (_, i) => {
+  const dates = useMemo(() => Array.from({ length: 14 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() + i);
     return {
@@ -49,7 +58,7 @@ export default function ReservationPage() {
       year: d.getFullYear(),
       fullDate: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
     };
-  });
+  }), []);
 
   const [selectedDate, setSelectedDate] = useState(dates[0].fullDate);
   const [formData, setFormData] = useState({ 
@@ -59,10 +68,26 @@ export default function ReservationPage() {
     end: null as number | null 
   });
 
-  const fetchReservations = async () => {
-    const { data } = await supabase.from('reservations').select('*');
+  const fetchReservations = useCallback(async () => {
+    const firstDate = dates[0].fullDate;
+    const lastDateExclusive = addDaysToDateString(dates[dates.length - 1].fullDate, 1);
+
+    const { data, error } = await supabase
+      .from('reservations')
+      .select('*')
+      .gte('data', firstDate)
+      .lt('data', lastDateExclusive)
+      .order('data', { ascending: true })
+      .order('start_time', { ascending: true });
+
+    if (error) {
+      console.error('예약 목록을 불러오지 못했습니다:', error);
+      alert('예약 목록을 불러오지 못했습니다. Supabase 권한/RLS 설정을 확인해주세요.');
+      return;
+    }
+
     setDbReservations(data || []);
-  };
+  }, [dates]);
 
   useEffect(() => { 
     fetchReservations(); 
@@ -77,7 +102,7 @@ export default function ReservationPage() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [selectedDate]);
+  }, [fetchReservations]);
 
   const formatTimeDisplay = (t: number) => {
     if (t === 24) return "24:00";
@@ -104,7 +129,8 @@ export default function ReservationPage() {
       .from('reservations')
       .select('start_time, end_time')
       .eq('piano_name', pianoName)
-      .eq('data', selectedDate)
+      .gte('data', selectedDate)
+      .lt('data', addDaysToDateString(selectedDate, 1))
       .lt('start_time', formData.end)
       .gt('end_time', formData.start);
 
@@ -133,6 +159,7 @@ export default function ReservationPage() {
     if (!error) { 
       setConfirmedInfo(reservationData);
       setShowSuccessModal(true);
+      setDbReservations((prev) => [...prev, reservationData]);
       setActivePiano(null); 
       setFormData({ name: '', studentId: '', start: null, end: null });
       await fetchReservations(); 
@@ -231,7 +258,7 @@ export default function ReservationPage() {
                     </div>
                     <div className="relative h-2.5 bg-gray-100 rounded-full flex gap-[1px]">
                       {timeSlots.map(t => {
-                        const res = dbReservations.find(r => r.piano_name === piano && String(r.data) === selectedDate && t >= r.start_time && t < r.end_time);
+                        const res = dbReservations.find(r => r.piano_name === piano && getDateOnly(String(r.data)) === selectedDate && t >= r.start_time && t < r.end_time);
                         return (
                           <div key={t} onClick={(e) => { e.stopPropagation(); if (res) setTooltip(tooltip?.time === t && tooltip?.piano === piano ? null : { piano, time: t, name: res.user_name }); }}
                             className={`flex-1 h-full first:rounded-l-full last:rounded-r-full transition-all relative ${res ? 'bg-[#C7D4F4] cursor-help' : 'bg-transparent'}`}>

@@ -4,16 +4,33 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
+type Reservation = {
+  id: number;
+  user_name: string;
+  student_id: string;
+  piano_name: string;
+  data: string;
+  start_time: number;
+  end_time: number;
+};
+
+type Ranking = {
+  name: string;
+  total: number;
+};
+
+const getDateOnly = (value: string) => value.slice(0, 10);
+
 export default function Home() {
   const pianos = ["전체", "1번 피아노", "2번 피아노", "3번 피아노", "업라이트 피아노"];
   const [showLookup, setShowLookup] = useState(false);
   const [info, setInfo] = useState({ name: '', studentId: '' });
-  const [myReservations, setMyReservations] = useState<any[]>([]);
+  const [myReservations, setMyReservations] = useState<Reservation[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminSearchKeyword, setAdminSearchKeyword] = useState('');
   const [adminPianoFilter, setAdminPianoFilter] = useState('전체');
-  const [rankings, setRankings] = useState<{name: string, total: number}[]>([]);
+  const [rankings, setRankings] = useState<Ranking[]>([]);
   
   const currentMonth = new Date().getMonth() + 1;
 
@@ -45,14 +62,23 @@ export default function Home() {
   const fetchRankings = async () => {
     const now = new Date();
     const firstDayOfMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+    const firstDayOfNextMonth = now.getMonth() === 11
+      ? `${now.getFullYear() + 1}-01-01`
+      : `${now.getFullYear()}-${String(now.getMonth() + 2).padStart(2, '0')}-01`;
     
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('reservations')
       .select('user_name, student_id, start_time, end_time')
-      .gte('data', firstDayOfMonth);
+      .gte('data', firstDayOfMonth)
+      .lt('data', firstDayOfNextMonth);
+
+    if (error) {
+      console.error('랭킹 정보를 불러오지 못했습니다:', error);
+      return;
+    }
 
     if (data) {
-      const aggregate = data.reduce((acc: any, cur) => {
+      const aggregate = data.reduce<Record<string, Ranking>>((acc, cur) => {
         const userKey = `${cur.user_name}_${cur.student_id}`;
         const duration = cur.end_time - cur.start_time;
         
@@ -64,7 +90,7 @@ export default function Home() {
       }, {});
 
       const sorted = Object.values(aggregate)
-        .map((item: any) => ({ 
+        .map((item) => ({ 
           name: item.name, 
           total: item.total 
         }))
@@ -107,19 +133,26 @@ export default function Home() {
     }
     const { data, error } = await query;
     if (!error) { 
-      setMyReservations(data || []); 
-      if (data?.length === 0) alert("오늘 이후의 예약 내역이 없습니다."); 
+      const upcomingReservations = (data || []).filter((reservation) => getDateOnly(String(reservation.data)) >= today);
+      setMyReservations(upcomingReservations); 
+      if (upcomingReservations.length === 0) alert("오늘 이후의 예약 내역이 없습니다."); 
+    } else {
+      console.error('예약 조회에 실패했습니다:', error);
+      alert('예약 조회에 실패했습니다. Supabase 권한/RLS 설정을 확인해주세요.');
     }
     setIsSearching(false);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: number) => {
     if (!confirm("정말로 이 예약을 취소하시겠습니까?")) return;
     const { error } = await supabase.from('reservations').delete().eq('id', id);
     if (!error) { 
       setMyReservations((prev) => prev.filter((res) => res.id !== id)); 
       alert("✅ 예약이 취소되었습니다."); 
       fetchRankings(); 
+    } else {
+      console.error('예약 취소에 실패했습니다:', error);
+      alert('예약 취소에 실패했습니다. 권한 또는 네트워크 상태를 확인해주세요.');
     }
   };
 
